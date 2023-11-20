@@ -7,6 +7,21 @@ using namespace std;
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
+const char	*tempVertShader = "#version 330 core\n"
+"layout (location = 0) in vec3 aPos;\n"
+"void main()\n"
+"{\n"
+"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+"}\0";
+
+const char* tempFragShader = "#version 330 core\n"
+"out vec4 FragColor;\n"
+"void main()\n"
+"{\n"
+"   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+"}\0";
+
+
 int main()
 {
 	glfwInit();
@@ -36,6 +51,25 @@ int main()
 	//Rendering Window for OGL + Window Resize
 	glViewport(0, 0, winWidth, winHeight);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+	//VBOs - Memory on the GPU allocated towards large batches of vertex data
+	unsigned int VBO;
+	glGenBuffers(1, &VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_STATIC_DRAW);
+
+	//Vertex Shader Stuff
+	unsigned int vertexShader;
+	vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vertexShader, 1, &tempVertShader, NULL);
+	glCompileShader(vertexShader);
+
+	//Fragment Shader Stuff
+	unsigned int fragmentShader;
+	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragmentShader, 1, &tempFragShader, NULL);
+	glCompileShader(fragmentShader);
+
 
 	//Render Loop
 	while (!glfwWindowShouldClose(window))
