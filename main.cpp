@@ -61,6 +61,7 @@ int main()
 		std::cout << "Failed to initialize GLAD" << endl;
 		return -1;
 	}
+
 	 
 	//Rendering Window for OGL + Window Resize
 	glViewport(0, 0, winWidth, winHeight);
@@ -168,6 +169,14 @@ int main()
 		glUseProgram(shaderProgram[2]);
 		glBindVertexArray(VAOs[2]);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
+
+		//Some Toggles
+		if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
+			glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
 
 		//EBO stuff
 		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
