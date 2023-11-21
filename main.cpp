@@ -14,11 +14,25 @@ const char	*tempVertShader = "#version 330 core\n"
 "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
 "}\0";
 
-const char* tempFragShader = "#version 330 core\n"
+const char* tempFragShaderRed = "#version 330 core\n"
 "out vec4 FragColor;\n"
 "void main()\n"
 "{\n"
-"   FragColor = vec4(1.0f, 1.0f, 0.0f, 1.0f);\n"
+"   FragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);\n"
+"}\0";
+
+const char* tempFragShaderGreen = "#version 330 core\n"
+"out vec4 FragColor;\n"
+"void main()\n"
+"{\n"
+"   FragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);\n"
+"}\0";
+
+const char* tempFragShaderBlue = "#version 330 core\n"
+"out vec4 FragColor;\n"
+"void main()\n"
+"{\n"
+"   FragColor = vec4(0.0f, 0.0f, 1.0f, 1.0f);\n"
 "}\0";
 
 
@@ -35,7 +49,7 @@ int main()
 	GLFWwindow* window = glfwCreateWindow(winWidth, winHeight, "RGL", NULL, NULL);
 	if (window == NULL)
 	{
-		cout << "Failed to create window" << endl;
+		std::cout << "Failed to create window" << endl;
 		glfwTerminate();
 		return -1;
 	}
@@ -44,7 +58,7 @@ int main()
 	//Initialize GLAD : GLAD manages function pointers for OGL
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
-		cout << "Failed to initialize GLAD" << endl;
+		std::cout << "Failed to initialize GLAD" << endl;
 		return -1;
 	}
 	 
@@ -53,13 +67,12 @@ int main()
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 	//VBOs - Memory on the GPU allocated towards large batches of vertex data
-	unsigned int VBO;
-	glGenBuffers(1, &VBO);
+	unsigned int VBOs[3];
+	glGenBuffers(3, VBOs);
 
 	//VAOs - Store attribute data for VBOs, makes updating VBOs far simpler
-	unsigned int VAO;
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
+	unsigned int VAOs[3];
+	glGenVertexArrays(3, VAOs);
 
 	//EBOs - prevents vertex overlap using indices
 	unsigned int EBO;
@@ -70,9 +83,30 @@ int main()
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(rectIndices), rectIndices, GL_STATIC_DRAW);
 
 
-	//Bind VBOs
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(triforce), triforce, GL_STATIC_DRAW);
+	//Bind VBOs for Triangle 1
+	glBindVertexArray(VAOs[0]);
+	glBindBuffer(GL_ARRAY_BUFFER, VBOs[0]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(triforceOne), triforceOne, GL_STATIC_DRAW);
+
+	//Interprets the vertex data per vertex attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+
+	//Triangle 2
+	glBindVertexArray(VAOs[1]);
+	glBindBuffer(GL_ARRAY_BUFFER, VBOs[1]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(triforceTwo), triforceTwo, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glEnableVertexAttribArray(0);
+
+	//Triangle 3
+	glBindVertexArray(VAOs[2]);
+	glBindBuffer(GL_ARRAY_BUFFER, VBOs[2]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(triforceThree), triforceThree, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glEnableVertexAttribArray(0);
+
 
 	//Vertex Shader Stuff
 	unsigned int vertexShader;
@@ -81,21 +115,36 @@ int main()
 	glCompileShader(vertexShader);
 
 	//Fragment Shader Stuff
-	unsigned int fragmentShader;
-	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &tempFragShader, NULL);
-	glCompileShader(fragmentShader);
+	unsigned int fragmentShader[3];
+	fragmentShader[0] = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragmentShader[0], 1, &tempFragShaderRed, NULL);
+	glCompileShader(fragmentShader[0]);
+
+	fragmentShader[1] = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragmentShader[1], 1, &tempFragShaderGreen, NULL);
+	glCompileShader(fragmentShader[1]);
+
+	fragmentShader[2] = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragmentShader[2], 1, &tempFragShaderBlue, NULL);
+	glCompileShader(fragmentShader[2]);
 
 	//Shader Program, baby
-	unsigned int shaderProgram;
-	shaderProgram = glCreateProgram();
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader);
-	glLinkProgram(shaderProgram);
+	unsigned int shaderProgram[3];
+	shaderProgram[0] = glCreateProgram();
+	shaderProgram[1] = glCreateProgram();
+	shaderProgram[2] = glCreateProgram();
+	glAttachShader(shaderProgram[0], vertexShader);
+	glAttachShader(shaderProgram[0], fragmentShader[0]);
 
-	//How to interpret the vertex data per vertex attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
+	glAttachShader(shaderProgram[1], vertexShader);
+	glAttachShader(shaderProgram[1], fragmentShader[1]);
+
+	glAttachShader(shaderProgram[2], vertexShader);
+	glAttachShader(shaderProgram[2], fragmentShader[2]);
+
+	glLinkProgram(shaderProgram[0]);
+	glLinkProgram(shaderProgram[1]);
+	glLinkProgram(shaderProgram[2]);
 
 	//Render Loop
 	while (!glfwWindowShouldClose(window))
@@ -104,14 +153,26 @@ int main()
 		//glClearColor(0.0f, 0.13f, 0.17f, 1.0f); //Bckground Color
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
-		//use it
-		glUseProgram(shaderProgram);
-		glBindVertexArray(VAO);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-		//draw it
+		
+		//Uses the Shader Program
+		glUseProgram(shaderProgram[0]);
+
+		//Bind it then draw it
+		glBindVertexArray(VAOs[0]);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
+
+		glUseProgram(shaderProgram[1]);
+		glBindVertexArray(VAOs[1]);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
+
+		glUseProgram(shaderProgram[2]);
+		glBindVertexArray(VAOs[2]);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
+
+		//EBO stuff
+		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		//glBindVertexArray(0);
-		glDrawArrays(GL_TRIANGLES, 0, 9);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -119,18 +180,20 @@ int main()
 
 	//We dont need these anymore, gpu has them
 	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
+	glDeleteShader(fragmentShader[0]);
+	glDeleteShader(fragmentShader[1]);
+	glDeleteShader(fragmentShader[2]);
 
 	glfwTerminate();
 
-	cout << "HELLO WORLD" << endl;
+	std::cout << "HELLO WORLD" << endl;
 	return 0;
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
-	cout << width << " " << height << endl;
+	std::cout << width << " " << height << endl;
 }
 
 void processInput(GLFWwindow* window)

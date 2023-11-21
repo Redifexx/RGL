@@ -5,13 +5,19 @@ float triangle[] = {
      0.0f,  0.5f, 0.0f
 };
 
-float triforce[] = {
+float triforceOne[] = {
     -0.25f, 0.0f, 0.0f,
      0.25f, 0.0f, 0.0f,
-     0.0f,  0.5f, 0.0f,
+     0.0f,  0.5f, 0.0f
+};
+
+float triforceTwo[] = {
      -0.5f, -0.5f, 0.0f,
      0.0f, -0.5f, 0.0f,
-     -0.25f, 0.0f, 0.0f,
+     -0.25f, 0.0f, 0.0f
+};
+
+float triforceThree[] = {
      0.0f, -0.5f, 0.0f,
      0.5f, -0.5f, 0.0f,
      0.25f, 0.0f, 0.0f
