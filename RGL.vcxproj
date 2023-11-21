@@ -75,8 +75,8 @@
     <LibraryPath>C:\Users\gohan\source\repos\RGL\Libraries\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Users\gohan\source\repos\RGL\Libraries\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\gohan\source\repos\RGL\Libraries\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\Gio\Documents\GitHub\RGL\Libraries\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Gio\Documents\GitHub\RGL\Libraries\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>C:\Users\gohan\source\repos\RGL\Libraries\include</IncludePath>
@@ -137,6 +137,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Users\Gio\Documents\GitHub\RGL\Libraries\lib;C:\Users\Gio\Documents\GitHub\RGL\Libraries\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
