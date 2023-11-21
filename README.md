@@ -1,2 +1,4 @@
 # RGL
- My OpenGL Engine
+ My C++ OpenGL Engine
+ Currently in Development :)
+ Fork as you please.
