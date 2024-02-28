@@ -14,6 +14,7 @@ const char	*tempVertShader = "#version 330 core\n"
 "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
 "}\0";
 
+//Different Frag Shaders to be applied to each vertex
 const char* tempFragShaderRed = "#version 330 core\n"
 "out vec4 FragColor;\n"
 "void main()\n"
@@ -160,15 +161,15 @@ int main()
 
 		//Bind it then draw it
 		glBindVertexArray(VAOs[0]);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
-
+		//glDrawArrays(GL_TRIANGLES, 0, 3);
+		//
 		glUseProgram(shaderProgram[1]);
 		glBindVertexArray(VAOs[1]);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
-
+		//glDrawArrays(GL_TRIANGLES, 0, 3);
+		//
 		glUseProgram(shaderProgram[2]);
 		glBindVertexArray(VAOs[2]);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		//glDrawArrays(GL_TRIANGLES, 0, 3);
 
 		//Some Toggles
 		if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
@@ -179,9 +180,9 @@ int main()
 			glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
 
 		//EBO stuff
-		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-		//glBindVertexArray(0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -192,7 +193,7 @@ int main()
 	glDeleteShader(fragmentShader[0]);
 	glDeleteShader(fragmentShader[1]);
 	glDeleteShader(fragmentShader[2]);
-
+	//Dont forget to delete the VAOs and VBOs
 	glfwTerminate();
 
 	std::cout << "HELLO WORLD" << endl;
