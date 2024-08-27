@@ -17,6 +17,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 double lastTime_ = 0.0;
 double deltaTime_ = 0.0;
 bool isGPUcalc = true;
+
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
@@ -24,12 +25,14 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         isGPUcalc = !isGPUcalc;
     }
 }
+
 void calculateDeltaTime()
 {
     double curTime = glfwGetTime();
     deltaTime_ = curTime - lastTime_;
     lastTime_ = curTime;
 }
+
 void toggleAA()
 {
     if (glIsEnabled(GL_MULTISAMPLE))
@@ -42,7 +45,7 @@ void toggleAA()
     }
 }
 
-// settings
+// Screen Resolution
 const unsigned int SCR_WIDTH = 1280;
 const unsigned int SCR_HEIGHT = 720;
 
@@ -55,7 +58,7 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-#ifdef __APPLE__
+#ifdef __APPLE__ //If on MacOS
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
@@ -76,23 +79,25 @@ int main()
     // // glew: load all OpenGL function pointers
     glewInit();
 
-    //IMGUI SETUP
+    // IMGUI SETUP
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
     io.Fonts->AddFontFromFileTTF("../fonts/F25_Bank_Printer.ttf", 13.0f);
+
     // Setup Platform/Renderer bindings
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
+
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
 
     //Projection Cam
-    float fov = glm::radians(60.0f);
+    float fov = glm::radians(60.0f); //Camera FOV
     float aspectRatio = SCR_WIDTH / (float)SCR_HEIGHT;
     float nearClip = 0.1f;
-    float farClip = 10.0f;
+    float farClip = 10.0f; // Far Camera Plane
     glm::mat4 projection = glm::perspective(fov, aspectRatio, nearClip, farClip);
 
     //Orthographic Cam
@@ -107,6 +112,7 @@ int main()
 
     // build and compile our shader program
     // ------------------------------------
+    // Can Later Be Abstracted
     Shader* phongShader = new Shader("../shaders/phong.vert", "../shaders/phong.frag");
     Shader* depthShader = new Shader("../shaders/phong.vert", "../shaders/depth.frag");
     Shader* normalShader = new Shader("../shaders/phong.vert", "../shaders/normal.frag");
@@ -170,7 +176,7 @@ int main()
         hasAA = true;
     }
     glEnable(GL_MULTISAMPLE);
-    ImVec4 bckColor = ImVec4(50.0/255.0, 50.0/255.0, 50.0/255.0, 1.0);
+    ImVec4 bckColor = ImVec4(50.0/255.0, 50.0/255.0, 50.0/255.0, 1.0); //Background Color
     Model* curModel = &feyd;
     while (!glfwWindowShouldClose(window))
     {
@@ -199,7 +205,6 @@ int main()
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-
 
         curModel->Draw(window);
 
