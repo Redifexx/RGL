@@ -8,15 +8,15 @@
                 "-I${workspaceFolder}\\include",
                 "-L${workspaceFolder}\\lib",
                 "${workspaceFolder}\\src\\*.cpp",
+                "${workspaceFolder}\\src\\*.c",
                 "${workspaceFolder}\\include\\imgui\\*.cpp",
                 //"${workspaceFolder}\\include\\imgui\\*.h",
-                "-lglew32s",
                 "-lglfw3dll",
                 "-lopengl32",
                 "-lgdi32",
                 "-limm32",
                 "-o",
-                "${workspaceFolder}\\bin\\rgl_dev_0.0.1.exe"
+                "${workspaceFolder}\\bin\\rgl.exe"
             ],
             "options": {
                 "cwd": "${fileDirname}"

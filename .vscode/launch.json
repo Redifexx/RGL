@@ -4,7 +4,7 @@
             "name": "C/C++: g++.exe build and debug active file",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}\\bin\\rgl_dev_0.0.1.exe",
+            "program": "${workspaceFolder}\\bin\\rgl.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",

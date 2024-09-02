@@ -6,8 +6,7 @@
 #include <sstream>
 #include <iostream>
 #include <cerrno>
-#define GLEW_STATIC
-#include <GL/glew.h>
+#include <glad/glad.h>
 
 
 std::string get_file_contents(const char* filename);

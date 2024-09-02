@@ -2,9 +2,9 @@ lCXX := g++
 CXXFLAGS := -g --std=c++17
 INCLUDE_DIR := -I../include
 LIB_DIR := -L../lib
-LIBRARIES := -lglew32s -lglfw3dll -lopengl32 -lgdi32 -limm32
-SOURCE_FILES := ../src/*.cpp ../include/imgui/*.cpp
-EXECUTABLE := rgl_dev_0.0.1.exe
+LIBRARIES := -lglfw3dll -lopengl32 -lgdi32 -limm32
+SOURCE_FILES := ../src/*.cpp ../src/*.c ../include/imgui/*.cpp
+EXECUTABLE := rgl.exe
 
 .PHONY: all build run clean
 

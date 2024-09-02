@@ -21,7 +21,7 @@ struct PointLight
     float ambientStrength;
     float specularStrength;
 };
-#define POINT_LIGHTS 2
+#define POINT_LIGHTS 1
 
 PointLight pointLights[POINT_LIGHTS];
 
@@ -80,13 +80,13 @@ void main()
     green.specularStrength = 0.75f;
 
     PointLight white;
-    white.pos = vec3(-5.0f, 1.0f, 35.0f);
+    white.pos = vec3(-3.0f, 0.0f, 3.0f);
     white.color = vec3(1.0f, 1.0f, 1.0f);
     white.ambientStrength = 0.1f;
     white.specularStrength = 0.75f;
 
-    pointLights[0] = red;
-    pointLights[1] = blue;
+    pointLights[0] = white;
+    //pointLights[1] = blue;
     //pointLights[2] = green;
     //pointLights[3] = white;
 

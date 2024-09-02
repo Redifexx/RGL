@@ -1,7 +1,8 @@
 // template based on material from learnopengl.com
-#define GLEW_STATIC
-#include <GL/glew.h>
+//#define GLEW_STATIC
+//#include <GL/glew.h>
 #define GLFW_INCLUDE_NONE
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_glfw.h>
@@ -65,7 +66,7 @@ int main()
     // glfw window creation
     // --------------------
     glfwWindowHint(GLFW_SAMPLES, 8);
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "RGL (Dev Build 0.0.1)", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "RGL (Dev Build 0.0.2)", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -76,8 +77,14 @@ int main()
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetScrollCallback(window, scroll_callback);
 
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+        std::cerr << "Failed to initialize GLAD" << std::endl;
+        return -1;
+    }
+    
+
     // // glew: load all OpenGL function pointers
-    glewInit();
+    //glewInit();
 
     // IMGUI SETUP
     // Setup Dear ImGui context
@@ -118,18 +125,11 @@ int main()
     Shader* normalShader = new Shader("../shaders/phong.vert", "../shaders/normal.frag");
     Shader* flatShader = new Shader("../shaders/flat.vert", "../shaders/flat.frag");
     Shader* gouraudShader = new Shader("../shaders/gouraud.vert", "../shaders/gouraud.frag");
-    //Shader* gouraudShader = new Shader("../shaders/phong.vert", "../shaders/phong.frag");
-    //Shader* offGPUShader = new Shader("../shaders/source.vert", "../shaders/source.frag");
 
     //Created a model object above main
-    Model feyd("../model/feyd.obj", phongShader);
-    Model city("../model/city.obj", phongShader);
+    Model cube("../model/cube.obj", phongShader);
     vector<Model*> allModels;
-    allModels.push_back(&feyd);
-    allModels.push_back(&city);
-    //Model monkeTwo("../model/f-16.obj", offGPUShader);
-    //monkeTwo.enableCPUCalc();
-    //monkeTwo.scaleModel(glm::vec3(0.001f, 0.001f, 0.001f));
+    allModels.push_back(&cube);
 
     for (int i = 0; i < allModels.size(); i++)
     {
@@ -177,7 +177,9 @@ int main()
     }
     glEnable(GL_MULTISAMPLE);
     ImVec4 bckColor = ImVec4(50.0/255.0, 50.0/255.0, 50.0/255.0, 1.0); //Background Color
-    Model* curModel = &feyd;
+    Model* curModel = &cube;
+    
+    //MAIN LOOP
     while (!glfwWindowShouldClose(window))
     {
         auto startTime = std::chrono::high_resolution_clock::now();
@@ -210,16 +212,11 @@ int main()
 
         ImGui::Begin("RGL Settings");
         ImGui::Text("-Current Model-");
-        ImGui::Columns(2, "Models");
+        ImGui::Columns(1, "Model");
         if (ImGui::Button("Feyd"))
         {
-            curModel = &feyd;
+            curModel = &cube;
         }   
-        ImGui::NextColumn();
-        if (ImGui::Button("City"))
-        {
-            curModel = &city;
-        } 
         ImGui::Columns(1);
         ImGui::Text(fpsText.c_str());
         string modelPosition = "Model Pos: " + to_string(curModel->modelPos.x) + " " + to_string(curModel->modelPos.y) + " " + to_string(curModel->modelPos.z);
