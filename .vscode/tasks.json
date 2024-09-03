@@ -7,9 +7,9 @@
             "args": [
                 "-I${workspaceFolder}\\include",
                 "-L${workspaceFolder}\\lib",
-                "${workspaceFolder}\\src\\*.cpp",
+                "${workspaceFolder}\\src\\main.cpp",
                 "${workspaceFolder}\\src\\*.c",
-                "${workspaceFolder}\\include\\imgui\\*.cpp",
+                //"${workspaceFolder}\\include\\imgui\\*.cpp",
                 //"${workspaceFolder}\\include\\imgui\\*.h",
                 "-lglfw3dll",
                 "-lopengl32",
