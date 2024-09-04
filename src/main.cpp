@@ -142,6 +142,7 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         curShader.use();
+        glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
         glBindTexture(GL_TEXTURE_2D, texture);
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
