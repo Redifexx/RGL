@@ -25,6 +25,12 @@ void processInput(GLFWwindow *window);
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 800;
 
+//Camera Settings for INput
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+const float cameraSpeed = 0.05f;
+
 int main()
 {
     // glfw: initialize and configure
@@ -100,6 +106,10 @@ int main()
 
     glBindVertexArray(VAO);
 
+    //GL Settings
+    glEnable(GL_DEPTH_TEST);
+
+
     //Texture Settigns
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
@@ -133,28 +143,37 @@ int main()
     //Matrix Transformations
     // create transformations
     glm::mat4 model         = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-    glm::mat4 view          = glm::mat4(1.0f);
+
+    //glm::mat4 view          = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::mat4 view = glm::mat4(1.0f);
     glm::mat4 projection    = glm::mat4(1.0f);
-    model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    view  = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-    projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+    model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+    projection = glm::perspective(glm::radians(60.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.001f, 1000.0f);
+
+    // camera transformations
+    //glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f); //z value is backwards towards screen
+    //glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+    //glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget); // flips z value back
+    //glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f); // universal up vector
+
+    //glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
+    //glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
+
+    // camera walk values (overwrites some stuff)
+    // ->cam Pos done
+
+
+
+
     // retrieve the matrix uniform locations
     unsigned int modelLoc = glGetUniformLocation(curShader.ID, "model");
     unsigned int viewLoc  = glGetUniformLocation(curShader.ID, "view");
+    unsigned int projectionLoc  = glGetUniformLocation(curShader.ID, "projection");
+
     // pass them to the shaders (3 different ways)
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
-    // note: currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
-    //curShader.setMat4("projection", projection);
-
-
-    int modelLoc = glGetUniformLocation(curShader.ID, "model");
-    int modelLoc = glGetUniformLocation(curShader.ID, "model");
-
-
-
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
     //MAIN RENDER LOOP
     while(!glfwWindowShouldClose(window))
@@ -164,13 +183,25 @@ int main()
 
         //Rendering Commands
         glClearColor(0.004f, 0.224f, 0.227f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         curShader.use();
+
+        //Matrix Transforms
+        //model = glm::rotate(model, (float)glfwGetTime() * 0.001f * glm::radians(5.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        
+        // cam walk
+        view = lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        std::cout << cameraPos.x << " " << cameraPos.y << " " << cameraPos.z << std::endl;
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
         glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
         glBindTexture(GL_TEXTURE_2D, texture);
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        //glDrawArrays(GL_TRIANGLES, 0, 36); //for drawing cubes
 
         //check and swap buffers
         glfwSwapBuffers(window);
@@ -200,6 +231,24 @@ void processInput(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
     {
         glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+    }
+
+    //Walking
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    {
+        cameraPos += cameraSpeed * cameraFront;
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    {
+        cameraPos -= cameraSpeed * cameraFront;
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    {
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    {
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
     }
 }
 
