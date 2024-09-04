@@ -7,7 +7,7 @@
             "args": [
                 "-I${workspaceFolder}\\include",
                 "-L${workspaceFolder}\\lib",
-                "${workspaceFolder}\\src\\main.cpp",
+                "${workspaceFolder}\\src\\*.cpp",
                 "${workspaceFolder}\\src\\*.c",
                 //"${workspaceFolder}\\include\\imgui\\*.cpp",
                 //"${workspaceFolder}\\include\\imgui\\*.h",
