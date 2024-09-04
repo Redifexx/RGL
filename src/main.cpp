@@ -23,7 +23,7 @@ void processInput(GLFWwindow *window);
 
 // Screen Resolution
 const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_HEIGHT = 800;
 
 int main()
 {
@@ -118,7 +118,7 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     int width, height, nrChannels;
-    unsigned char* data = stbi_load("../textures/checkerfloor.png", &width, &height, &nrChannels, 0); //loads image
+    unsigned char* data = stbi_load("../textures/brick5.png", &width, &height, &nrChannels, 0); //loads image
     if (data)
     {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
