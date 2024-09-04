@@ -12,6 +12,8 @@
 #include <string>
 #include <chrono>
 #include "shader.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb/stb_image.h>
 
 // Resizeable Window
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -56,15 +58,15 @@ int main()
     
     //Scene Setup
     float vertices[] = {
-        0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // top right
-        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom right
-        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom left
-        -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f  // top left 
+        0.5f,  0.5f, 0.0f,      1.0f, 0.0f, 0.0f,    1.0f, 1.0f, // top right
+        0.5f, -0.5f, 0.0f,      0.0f, 1.0f, 0.0f,    1.0f, 0.0f, // bottom right
+        -0.5f, -0.5f, 0.0f,     0.0f, 0.0f, 1.0f,    0.0f, 0.0f, // bottom left
+        -0.5f, 0.5f, 0.0f,      1.0f, 1.0f, 1.0f,    0.0f, 1.0f // bottom left
     };
 
     unsigned int indices[] = {  // note that we start from 0!
         0, 1, 3,   // first triangle
-        1, 2, 3    // second triangle
+        1, 2, 3
     };  
 
     Shader curShader("../shaders/source.vs", "../shaders/source.fs");
@@ -87,13 +89,47 @@ int main()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     // color attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3* sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3* sizeof(float)));
     glEnableVertexAttribArray(1);
+    // texture attribute
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
 
     glBindVertexArray(VAO);
+
+    //Texture Settigns
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    //Textures
+    unsigned int texture;
+    glGenTextures(1, &texture); //generates a texture
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    //Texture Settigns
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load("../textures/checkerfloor.png", &width, &height, &nrChannels, 0); //loads image
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D); //generates mipmaps :)
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data); // cleans memory
+
 
     //MAIN RENDER LOOP
     while(!glfwWindowShouldClose(window))
@@ -106,6 +142,7 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         curShader.use();
+        glBindTexture(GL_TEXTURE_2D, texture);
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
