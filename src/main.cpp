@@ -3,8 +3,6 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
-#include <GLM/glm.hpp>
-#include <GLM/gtc/matrix_transform.hpp>
 #include <fstream>
 #include <sstream>
 #include <cmath>
@@ -12,6 +10,7 @@
 #include <string>
 #include <chrono>
 #include "shader.h"
+#include "camera.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
@@ -21,15 +20,28 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 // Input
 void processInput(GLFWwindow *window);
 
+// Mouse Cursor
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+
+//Scroll Callback
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+
+
+// GLOBAL VARIABLES
+
 // Screen Resolution
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 800;
 
-//Camera Settings for INput
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-const float cameraSpeed = 0.05f;
+float deltaTime = 0.0f;	// Time between current frame and last frame
+float lastFrame = 0.0f; // Time of last frame
+
+// mouse cursor initialization + CAM
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+float lastX = SCR_WIDTH / 2.0f;
+float lastY = SCR_HEIGHT / 2.0f;
+bool firstMouse = true;
+
 
 int main()
 {
@@ -56,6 +68,9 @@ int main()
     }
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback); 
+    glfwSetScrollCallback(window, scroll_callback); 
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cerr << "Failed to initialize GLAD" << std::endl;
@@ -148,21 +163,7 @@ int main()
     glm::mat4 view = glm::mat4(1.0f);
     glm::mat4 projection    = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-    projection = glm::perspective(glm::radians(60.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.001f, 1000.0f);
-
-    // camera transformations
-    //glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f); //z value is backwards towards screen
-    //glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-    //glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget); // flips z value back
-    //glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f); // universal up vector
-
-    //glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
-    //glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
-
-    // camera walk values (overwrites some stuff)
-    // ->cam Pos done
-
-
+    projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.001f, 1000.0f);
 
 
     // retrieve the matrix uniform locations
@@ -187,12 +188,17 @@ int main()
 
         curShader.use();
 
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;  
+
         //Matrix Transforms
         //model = glm::rotate(model, (float)glfwGetTime() * 0.001f * glm::radians(5.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         
         // cam walk
-        view = lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-        std::cout << cameraPos.x << " " << cameraPos.y << " " << cameraPos.z << std::endl;
+        view = camera.GetViewMatrix();
+        projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.001f, 1000.0f);
+        std::cout << "FOV: " << camera.Zoom << std::endl;
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
@@ -216,6 +222,7 @@ int main()
 // ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow *window)
 {
+    float cameraSpeed = 2.5f * deltaTime;
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
         glfwSetWindowShouldClose(window, true);
@@ -236,19 +243,27 @@ void processInput(GLFWwindow *window)
     //Walking
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
-        cameraPos += cameraSpeed * cameraFront;
+        camera.ProcessKeyboard(FORWARD, deltaTime);
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
     {
-        cameraPos -= cameraSpeed * cameraFront;
+        camera.ProcessKeyboard(BACKWARD, deltaTime);
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
     {
-        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+        camera.ProcessKeyboard(LEFT, deltaTime);
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     {
-        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+        camera.ProcessKeyboard(RIGHT, deltaTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+    {
+        camera.ProcessKeyboard(UP, deltaTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+    {
+        camera.ProcessKeyboard(DOWN, deltaTime);
     }
 }
 
@@ -259,4 +274,30 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     // make sure the viewport matches the new window dimensions; note that width and 
     // height will be significantly larger than specified on retina displays.
     glViewport(0, 0, width, height);
+}
+
+void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
+{
+
+    float xpos = static_cast<float>(xposIn);
+    float ypos = static_cast<float>(yposIn);
+
+    if (firstMouse) // initially set to true
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos;
+    lastX = xpos;
+    lastY = ypos;
+
+    camera.ProcessMouseMovement(xoffset, yoffset);
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
