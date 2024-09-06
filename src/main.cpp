@@ -11,6 +11,7 @@
 #include <chrono>
 #include "shader.h"
 #include "camera.h"
+#include "primitives.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
@@ -43,7 +44,8 @@ float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 
 //Light Positions
-glm::vec3 lightPos(0.0f, 3.0f, 0.0f);
+glm::vec3 lightPos(3.0f, 3.0f, 3.0f);
+glm::vec3 cubePos(0.0f, 0.0f, 0.0f);
 
 
 int main()
@@ -82,49 +84,6 @@ int main()
     
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
-    float vertices[] = {
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-    };
 
     unsigned int indices[] = {  // note that we start from 0!
         0, 1, 3,   // first triangle
@@ -144,7 +103,7 @@ int main()
     unsigned int VBO;
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cube), cube, GL_STATIC_DRAW);
 
     ////EBO -- disabled for cube
     ////unsigned int EBO;
@@ -170,16 +129,19 @@ int main()
     glGenVertexArrays(1, &lightVAO);
     glBindVertexArray(lightVAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3* sizeof(float)));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3* sizeof(float)));
     glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5* sizeof(float)));
+    glEnableVertexAttribArray(2);
+
 
     unsigned int lightCubeVAO;
     glGenVertexArrays(1, &lightCubeVAO);
     glBindVertexArray(lightCubeVAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
 
@@ -269,21 +231,35 @@ int main()
         // cam walk
         view = camera.GetViewMatrix();
         projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.001f, 1000.0f);
-        //std::cout << "FOV: " << camera.Zoom << std::endl;
-       // glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        //glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-        //glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+   
         lightingShader.use();
-        //glUniformMatrix4fv(glGetUniformLocation(lightingShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
-        //glUniformMatrix4fv(glGetUniformLocation(lightingShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
-        //glUniformMatrix4fv(glGetUniformLocation(lightingShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-        unsigned int objectColorLoc = glGetUniformLocation(lightingShader.ID, "objectColor");
-        unsigned int lightColorLoc = glGetUniformLocation(lightingShader.ID, "lightColor");
-        glm::vec3 objectColor(1.0f, 0.5f, 0.31f);
+        // Material Settings
+        glm::vec3 materialAmbient(0.2f, 0.2f, 0.2f);
+        glm::vec3 materialDiffuse(1.0f, 1.0f, 1.0f);
+        glm::vec3 materialSpecular(0.5f, 0.5f, 0.5f);
+        float materialShininess = 32.0f;
+        glUniform3fv(glGetUniformLocation(lightingShader.ID, "material.ambient"), 1, glm::value_ptr(materialAmbient));
+        glUniform3fv(glGetUniformLocation(lightingShader.ID, "material.diffuse"), 1, glm::value_ptr(materialDiffuse));
+        glUniform3fv(glGetUniformLocation(lightingShader.ID, "material.specular"), 1, glm::value_ptr(materialSpecular));
+        glUniform1f(glGetUniformLocation(lightingShader.ID, "material.shininess"), materialShininess);
+
+        //Light Settings
         glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
-        glUniform3fv(objectColorLoc, 1, glm::value_ptr(objectColor));
-        glUniform3fv(lightColorLoc, 1, glm::value_ptr(lightColor));
+        glUniform3fv(glGetUniformLocation(lightingShader.ID, "light.position"), 1, glm::value_ptr(lightPos));
+        glUniform3fv(glGetUniformLocation(lightingShader.ID, "light.ambient"), 1, glm::value_ptr(lightColor));
+        glUniform3fv(glGetUniformLocation(lightingShader.ID, "light.diffuse"), 1, glm::value_ptr(lightColor));
+        glUniform3fv(glGetUniformLocation(lightingShader.ID, "light.specular"), 1, glm::value_ptr(lightColor));
+
+        glUniform3fv(glGetUniformLocation(lightingShader.ID, "viewPos"), 1, glm::value_ptr(camera.Position));
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, cubePos);
+        glUniformMatrix4fv(glGetUniformLocation(lightingShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(glGetUniformLocation(lightingShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(lightingShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+
         glBindVertexArray(lightVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -291,6 +267,10 @@ int main()
         model = glm::mat4(1.0f);
         model = glm::translate(model, lightPos);
         model = glm::scale(model, glm::vec3(0.2f));
+
+        glUniform3fv(glGetUniformLocation(lightCubeShader.ID, "lightColor"), 1, glm::value_ptr(lightColor));
+
+
         glUniformMatrix4fv(glGetUniformLocation(lightCubeShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
         glUniformMatrix4fv(glGetUniformLocation(lightCubeShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(glGetUniformLocation(lightCubeShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
