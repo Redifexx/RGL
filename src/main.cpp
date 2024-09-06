@@ -157,7 +157,7 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     //Textures
-    unsigned int diffuse, specular;
+    unsigned int diffuse, specular, emission;
 
     //Diffuse
     glGenTextures(1, &diffuse); //generates a texture
@@ -200,9 +200,32 @@ int main()
     }
     stbi_image_free(data); // cleans memory
 
+    //Emission
+    glGenTextures(1, &emission); //generates a texture
+    glBindTexture(GL_TEXTURE_2D, emission);
+
+    //Texture Settigns
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    data = stbi_load("../textures/tile19_emis.png", &width, &height, &nrChannels, 0); //loads image
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D); //generates mipmaps :)
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data); // cleans memory
+
     lightingShader.use();
     glUniform1i(glGetUniformLocation(lightingShader.ID, "material.diffuse"), 0);
     glUniform1i(glGetUniformLocation(lightingShader.ID, "material.specularMap"), 1);
+    glUniform1i(glGetUniformLocation(lightingShader.ID, "material.emissionMap"), 2);
 
 
     //Matrix Transformations
@@ -263,6 +286,8 @@ int main()
         glBindTexture(GL_TEXTURE_2D, diffuse);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, specular);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, emission);
         lightingShader.use();
 
         // Material Settings
