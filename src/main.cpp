@@ -259,6 +259,8 @@ int main()
     glUniformMatrix4fv(glGetUniformLocation(lightCubeShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
     
 
+    double lasttime = glfwGetTime();
+
     //MAIN RENDER LOOP
     while(!glfwWindowShouldClose(window))
     {
@@ -333,6 +335,11 @@ int main()
         //curShader.use();
         //glBindVertexArray(VAO);
         //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        while (glfwGetTime() < lasttime + 1.0/60.0) {
+            //FPS
+        }
+        lasttime += 1.0/60.0;
 
         //check and swap buffers
         glfwSwapBuffers(window);
