@@ -157,9 +157,11 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     //Textures
-    unsigned int texture;
-    glGenTextures(1, &texture); //generates a texture
-    glBindTexture(GL_TEXTURE_2D, texture);
+    unsigned int diffuse, specular;
+
+    //Diffuse
+    glGenTextures(1, &diffuse); //generates a texture
+    glBindTexture(GL_TEXTURE_2D, diffuse);
 
     //Texture Settigns
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
@@ -168,7 +170,7 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     int width, height, nrChannels;
-    unsigned char* data = stbi_load("../textures/brick5.png", &width, &height, &nrChannels, 0); //loads image
+    unsigned char* data = stbi_load("../textures/tile19.png", &width, &height, &nrChannels, 0); //loads image
     if (data)
     {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
@@ -179,6 +181,29 @@ int main()
         std::cout << "Failed to load texture" << std::endl;
     }
     stbi_image_free(data); // cleans memory
+
+    glGenTextures(1, &specular); //generates a textusre
+    glBindTexture(GL_TEXTURE_2D, specular);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    data = stbi_load("../textures/tile19_spec.png", &width, &height, &nrChannels, 0); //loads image
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D); //generates mipmaps :)
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data); // cleans memory
+
+    lightingShader.use();
+    glUniform1i(glGetUniformLocation(lightingShader.ID, "material.diffuse"), 0);
+    glUniform1i(glGetUniformLocation(lightingShader.ID, "material.specularMap"), 1);
+
 
     //Matrix Transformations
     // create transformations
@@ -232,22 +257,24 @@ int main()
         view = camera.GetViewMatrix();
         projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.001f, 1000.0f);
    
+
+        //Setting Up Texture
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, diffuse);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, specular);
         lightingShader.use();
 
         // Material Settings
-        glm::vec3 materialAmbient(0.2f, 0.2f, 0.2f);
-        glm::vec3 materialDiffuse(1.0f, 1.0f, 1.0f);
         glm::vec3 materialSpecular(0.5f, 0.5f, 0.5f);
         float materialShininess = 32.0f;
-        glUniform3fv(glGetUniformLocation(lightingShader.ID, "material.ambient"), 1, glm::value_ptr(materialAmbient));
-        glUniform3fv(glGetUniformLocation(lightingShader.ID, "material.diffuse"), 1, glm::value_ptr(materialDiffuse));
         glUniform3fv(glGetUniformLocation(lightingShader.ID, "material.specular"), 1, glm::value_ptr(materialSpecular));
         glUniform1f(glGetUniformLocation(lightingShader.ID, "material.shininess"), materialShininess);
 
         //Light Settings
         glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
         glUniform3fv(glGetUniformLocation(lightingShader.ID, "light.position"), 1, glm::value_ptr(lightPos));
-        glUniform3fv(glGetUniformLocation(lightingShader.ID, "light.ambient"), 1, glm::value_ptr(lightColor));
+        glUniform3fv(glGetUniformLocation(lightingShader.ID, "light.ambient"), 1, glm::value_ptr(lightColor * 0.1f));
         glUniform3fv(glGetUniformLocation(lightingShader.ID, "light.diffuse"), 1, glm::value_ptr(lightColor));
         glUniform3fv(glGetUniformLocation(lightingShader.ID, "light.specular"), 1, glm::value_ptr(lightColor));
 
