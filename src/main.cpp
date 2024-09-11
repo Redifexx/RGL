@@ -33,6 +33,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 // Screen Resolution
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 800;
+float fpsCap = 170.0f;
 
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
@@ -43,8 +44,9 @@ float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 
+
 //Light Positions
-glm::vec3 lightPos(3.0f, 3.0f, 3.0f);
+glm::vec3 lightPos(1.0f, 1.0f, 1.0f);
 glm::vec3 cubePos(0.0f, 0.0f, 0.0f);
 
 
@@ -268,7 +270,7 @@ int main()
         processInput(window);
 
         //Rendering Commands
-        glClearColor(0.004f, 0.224f, 0.227f, 1.0f);
+        glClearColor(0.643f, 0.827f, 0.984f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         float currentFrame = glfwGetTime();
@@ -299,7 +301,7 @@ int main()
         glUniform1f(glGetUniformLocation(lightingShader.ID, "material.shininess"), materialShininess);
 
         //Light Settings
-        glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
+        glm::vec3 lightColor(0.0f, 1.0f, 1.0f);
         glUniform3fv(glGetUniformLocation(lightingShader.ID, "light.position"), 1, glm::value_ptr(lightPos));
         glUniform3fv(glGetUniformLocation(lightingShader.ID, "light.ambient"), 1, glm::value_ptr(lightColor * 0.1f));
         glUniform3fv(glGetUniformLocation(lightingShader.ID, "light.diffuse"), 1, glm::value_ptr(lightColor));
@@ -336,10 +338,10 @@ int main()
         //glBindVertexArray(VAO);
         //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        while (glfwGetTime() < lasttime + 1.0/60.0) {
+        while (glfwGetTime() < lasttime + 1.0/fpsCap) {
             //FPS
         }
-        lasttime += 1.0/60.0;
+        lasttime += 1.0/fpsCap;
 
         //check and swap buffers
         glfwSwapBuffers(window);

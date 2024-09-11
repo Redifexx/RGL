@@ -24,6 +24,20 @@ struct Light
     vec3 specular;
 };
 
+struct DirectionalLight
+{
+    vec3 direction;
+    
+};
+
+struct SpotLight
+{
+    vec3 position;
+    vec3 direction;
+    float cutOff;
+};
+
+
 uniform Light light;
 uniform Material material;
 uniform vec3 viewPos;
@@ -49,6 +63,11 @@ void main()
 
     vec3 emissive = vec3(0.8f, 1.0f, 0.8f) * vec3(texture(material.emissionMap, TexCoord));
 
-    vec3 result = (ambient + diffuse + specular + emissive);
+    //attenuation
+    float distance = length(light.position - FragPos);
+    float attenuation = 1.0 / (1.0 + 0.1 * distance + 0.01 * distance * distance);
+    float intensity = 2.0f;
+
+    vec3 result = (ambient + attenuation * intensity * (diffuse + specular + emissive));
     FragColor = vec4(result, 1.0f);
 }
