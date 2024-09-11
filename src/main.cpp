@@ -40,6 +40,8 @@ float lastFrame = 0.0f; // Time of last frame
 
 // mouse cursor initialization + CAM
 Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
+
+//Cursor Lock
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -172,7 +174,7 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     int width, height, nrChannels;
-    unsigned char* data = stbi_load("../textures/tile19.png", &width, &height, &nrChannels, 0); //loads image
+    unsigned char* data = stbi_load("../textures/stone.png", &width, &height, &nrChannels, 0); //loads image
     if (data)
     {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
@@ -202,32 +204,32 @@ int main()
     }
     stbi_image_free(data); // cleans memory
 
-    //Emission
-    glGenTextures(1, &emission); //generates a texture
-    glBindTexture(GL_TEXTURE_2D, emission);
-
-    //Texture Settigns
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    data = stbi_load("../textures/tile19_emis.png", &width, &height, &nrChannels, 0); //loads image
-    if (data)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D); //generates mipmaps :)
-    }
-    else
-    {
-        std::cout << "Failed to load texture" << std::endl;
-    }
-    stbi_image_free(data); // cleans memory
-
-    lightingShader.use();
-    glUniform1i(glGetUniformLocation(lightingShader.ID, "material.diffuse"), 0);
-    glUniform1i(glGetUniformLocation(lightingShader.ID, "material.specularMap"), 1);
-    glUniform1i(glGetUniformLocation(lightingShader.ID, "material.emissionMap"), 2);
+    ////Emission
+    //glGenTextures(1, &emission); //generates a texture
+    //glBindTexture(GL_TEXTURE_2D, emission);
+//
+    ////Texture Settigns
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+//
+    //data = stbi_load("../textures/tile19_emis.png", &width, &height, &nrChannels, 0); //loads image
+    //if (data)
+    //{
+    //    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    //    glGenerateMipmap(GL_TEXTURE_2D); //generates mipmaps :)
+    //}
+    //else
+    //{
+    //    std::cout << "Failed to load texture" << std::endl;
+    //}
+    //stbi_image_free(data); // cleans memory
+//
+    //lightingShader.use();
+    //glUniform1i(glGetUniformLocation(lightingShader.ID, "material.diffuse"), 0);
+    //glUniform1i(glGetUniformLocation(lightingShader.ID, "material.specularMap"), 1);
+    //glUniform1i(glGetUniformLocation(lightingShader.ID, "material.emissionMap"), 2);
 
 
     //Matrix Transformations
@@ -301,23 +303,32 @@ int main()
         glUniform1f(glGetUniformLocation(lightingShader.ID, "material.shininess"), materialShininess);
 
         //Light Settings
-        glm::vec3 lightColor(0.0f, 1.0f, 1.0f);
+        glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
         glUniform3fv(glGetUniformLocation(lightingShader.ID, "light.position"), 1, glm::value_ptr(lightPos));
-        glUniform3fv(glGetUniformLocation(lightingShader.ID, "light.ambient"), 1, glm::value_ptr(lightColor * 0.1f));
+        glUniform3fv(glGetUniformLocation(lightingShader.ID, "light.ambient"), 1, glm::value_ptr(lightColor * 0.3f));
         glUniform3fv(glGetUniformLocation(lightingShader.ID, "light.diffuse"), 1, glm::value_ptr(lightColor));
         glUniform3fv(glGetUniformLocation(lightingShader.ID, "light.specular"), 1, glm::value_ptr(lightColor));
 
         glUniform3fv(glGetUniformLocation(lightingShader.ID, "viewPos"), 1, glm::value_ptr(camera.Position));
 
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, cubePos);
-        glUniformMatrix4fv(glGetUniformLocation(lightingShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(glGetUniformLocation(lightingShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(glGetUniformLocation(lightingShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-
-
+        // Cube Pos
         glBindVertexArray(lightVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        for (int i = 0; i < 16; i++)
+        {
+            for (int j = 0; j < 16; j++)
+            {
+                for (int k = 0; k < 16; k++)
+                {
+                    glm::vec3 curPos((float)i, -(float)k, (float)j);
+                    model = glm::mat4(1.0f);
+                    model = glm::translate(model, curPos);
+                    glUniformMatrix4fv(glGetUniformLocation(lightingShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+                    glUniformMatrix4fv(glGetUniformLocation(lightingShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+                    glUniformMatrix4fv(glGetUniformLocation(lightingShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+                    glDrawArrays(GL_TRIANGLES, 0, 36);
+                }
+            }
+        }
 
         lightCubeShader.use();
         model = glm::mat4(1.0f);
