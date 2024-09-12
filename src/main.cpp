@@ -9,9 +9,12 @@
 #include <vector>
 #include <string>
 #include <chrono>
-#include "shader.h"
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_glfw.h>
+#include <imgui/imgui_impl_opengl3.h>
 #include "camera.h"
 #include "primitives.h"
+#include "model.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
@@ -36,7 +39,7 @@ unsigned int loadTexture(char const* path);
 // Screen Resolution
 const unsigned int SCR_WIDTH = 900;
 const unsigned int SCR_HEIGHT = 900;
-float fpsCap = 170.0f;
+float fpsCap = 170000.0f;
 
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
@@ -48,6 +51,16 @@ Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
+
+//Delta Time
+double deltaTime_ = 0.0f;
+double lastTime_ = 0.0f;
+void calculateDeltaTime()
+{
+    double curTime = glfwGetTime();
+    deltaTime_ = curTime - lastTime_;
+    lastTime_ = curTime;
+}
 
 
 //Light Positions
@@ -71,7 +84,7 @@ int main()
 
     // glfw window creation
     // --------------------
-    glfwWindowHint(GLFW_SAMPLES, 8);
+    glfwWindowHint(GLFW_SAMPLES, 0);
     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "RGL (Dev Build 0.0.2)", NULL, NULL);
     if (window == NULL)
     {
@@ -89,6 +102,17 @@ int main()
         std::cerr << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
+
+    stbi_set_flip_vertically_on_load(true);
+
+    // IMGUI SETUP
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO &io = ImGui::GetIO();
+    // Setup Platform/Renderer bindings
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 330");
     
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -101,6 +125,8 @@ int main()
     //Shader curShader("../shaders/source.vs", "../shaders/source.fs");
     Shader phongShader("../shaders/source.vs", "../shaders/source.fs");
     Shader lightCubeShader("../shaders/lightCube.vs", "../shaders/lightCube.fs");
+    Model backpack("../models/backpack/backpack.obj");
+    //Model jet("../model/f-16.obj");
 
 
     ////EBO -- disabled for cube
@@ -147,50 +173,98 @@ int main()
 
     //GL Settings
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_MULTISAMPLE);
+    glDepthFunc(GL_LESS);
+    glCullFace(GL_FRONT);
+    glfwSwapInterval(0); // Disables VSync
 
     //Texture
-    unsigned int diffuseMap = loadTexture("../textures/barrel_side.png");
-    unsigned int specularMap = loadTexture("../textures/barrel_side_spec.png");
+    //unsigned int diffuseMap = loadTexture("../textures/barrel_side.png");
+    //unsigned int specularMap = loadTexture("../textures/barrel_side_spec.png");
     
     phongShader.use();
-    glUniform1i(glGetUniformLocation(phongShader.ID, "material.diffuse"), 0);
-    glUniform1i(glGetUniformLocation(phongShader.ID, "material.specularMap"), 1);
+    //glUniform1i(glGetUniformLocation(phongShader.ID, "material.diffuse"), 0);
+    //glUniform1i(glGetUniformLocation(phongShader.ID, "material.specularMap"), 1);
     //glUniform1i(glGetUniformLocation(lightingShader.ID, "material.specularMap"), 1);
     //glUniform1i(glGetUniformLocation(lightingShader.ID, "material.emissionMap"), 2);
-
     
 
     double lasttime = glfwGetTime();
+    int frameCount = 0;
+    double totalFPS = 0;
+    double totalRenderTime = 0.0;
+
+    //IMGUI Stuff
+    std::string fpsText = "";
 
     //MAIN RENDER LOOP
     while(!glfwWindowShouldClose(window))
     {
+        auto startTime = std::chrono::high_resolution_clock::now();
         //Process Input
         processInput(window);
 
+        //fps capture
+        calculateDeltaTime();   
+        double fps = 1.0 / deltaTime_;
+        totalFPS += fps;
+        frameCount++;
+        if (frameCount >= 30)
+        {
+            fpsText = "FPS: " + std::to_string(totalFPS / frameCount);
+            frameCount = 0;
+            totalFPS = 0;
+            totalRenderTime = 0.0;
+        }
+
         //Rendering Commands
-        glClearColor(0.643f, 0.827f, 0.984f, 1.0f);
+        glClearColor(0.333f, 0.816f, 0.988f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+        ImGuiWindowFlags window_flags = 0;
+        window_flags |= ImGuiWindowFlags_NoBackground;
+        window_flags |= ImGuiWindowFlags_NoTitleBar;
+        window_flags |= ImGuiWindowFlags_NoDecoration; 
+        window_flags |= ImGuiWindowFlags_NoResize;
+
+        ImGui::SetNextWindowSize(ImVec2(900, 900)); 
+        bool * open_ptr = nullptr;
+        ImGui::Begin("I'm a Window!", open_ptr, window_flags);
+        ImGui::SetCursorPos(ImVec2(20, 20));
+        ImGui::Text(fpsText.c_str());
 
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
 
+        //Render Stuff
         phongShader.use();
 
         // Cam Transformations
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.001f, 1000.0f);
 
-        // Material Settings
-        float materialSpecFactor = 0.6f;
-        float materialEmisFactor = 0.0f;
-        float materialShininess = 32.0f;
-        glUniform1f(glGetUniformLocation(phongShader.ID, "material.specularFactor"), materialSpecFactor);
-        glUniform1f(glGetUniformLocation(phongShader.ID, "material.emissiveFactor"), materialEmisFactor);
-        glUniform1f(glGetUniformLocation(phongShader.ID, "material.shininess"), materialShininess);
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(1.0f));
 
+        glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        backpack.Draw(phongShader);
+        
+        // Material Settings
+        //float materialSpecFactor = 0.6f;
+        //float materialEmisFactor = 0.0f;
+        //float materialShininess = 32.0f;
+        //glUniform1f(glGetUniformLocation(phongShader.ID, "material.specularFactor"), materialSpecFactor);
+        //glUniform1f(glGetUniformLocation(phongShader.ID, "material.emissiveFactor"), materialEmisFactor);
+        //glUniform1f(glGetUniformLocation(phongShader.ID, "material.shininess"), materialShininess);
+        
         //Light Settings
         glm::vec3 white = glm::vec3(1.0f);
         glUniform3fv(glGetUniformLocation(phongShader.ID, "spotLight.position"), 1, glm::value_ptr(camera.Position));
@@ -204,55 +278,67 @@ int main()
 
         glUniform3fv(glGetUniformLocation(phongShader.ID, "viewPos"), 1, glm::value_ptr(camera.Position));
 
+        
+
         // Cube Pos
-        glm::mat4 model = glm::mat4(1.0f);
-        glBindVertexArray(lightVAO);
-        for (int i = 0; i < 16; i++)
-        {
-            for (int j = 0; j < 16; j++)
-            {
-                for (int k = 0; k < 16; k++)
-                {
-                    glm::vec3 curPos((float)i, -(float)k, (float)j);
-                    model = glm::mat4(1.0f);
-                    model = glm::translate(model, curPos);
-                    glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
-                    glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
-                    glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-                    glDrawArrays(GL_TRIANGLES, 0, 36);
-                }
-            }
-        }
+        model = glm::mat4(1.0f);
+        //model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+        //model = glm::scale(model, glm::vec3(1.0f));
+        //glBindVertexArray(lightVAO);
+        //for (int i = 0; i < 16; i++)
+        //{
+        //    for (int j = 0; j < 16; j++)
+        //    {
+        //        for (int k = 0; k < 16; k++)
+        //        {
+        //            glm::vec3 curPos((float)i, -(float)k, (float)j);
+        //            model = glm::mat4(1.0f);
+        //            model = glm::translate(model, curPos);
+        //            glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        //            glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        //            glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        //            glDrawArrays(GL_TRIANGLES, 0, 36);
+        //        }
+        //    }
+        //}
 
         //Setting Up Texture
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, diffuseMap);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, specularMap);
+        //glActiveTexture(GL_TEXTURE0);
+        //glBindTexture(GL_TEXTURE_2D, diffuseMap);
+        //glActiveTexture(GL_TEXTURE1);
+        //glBindTexture(GL_TEXTURE_2D, specularMap);
 
 
-        lightCubeShader.use();
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, lightPos);
-        model = glm::scale(model, glm::vec3(0.2f));
-        glm::vec3 lightColor(1.0f, 0.0f, 1.0f);
-
-        glUniform3fv(glGetUniformLocation(lightCubeShader.ID, "lightColor"), 1, glm::value_ptr(lightColor));
-        glUniformMatrix4fv(glGetUniformLocation(lightCubeShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(glGetUniformLocation(lightCubeShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(glGetUniformLocation(lightCubeShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-
-        glBindVertexArray(lightCubeVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36); //for drawing cubes
+        //lightCubeShader.use();
+        //model = glm::mat4(1.0f);
+        //model = glm::translate(model, lightPos);
+        //model = glm::scale(model, glm::vec3(0.2f));
+        //glm::vec3 lightColor(1.0f, 0.0f, 1.0f);
+//
+        //glUniform3fv(glGetUniformLocation(lightCubeShader.ID, "lightColor"), 1, glm::value_ptr(lightColor));
+        //glUniformMatrix4fv(glGetUniformLocation(lightCubeShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        //glUniformMatrix4fv(glGetUniformLocation(lightCubeShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        //glUniformMatrix4fv(glGetUniformLocation(lightCubeShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+//
+        //glBindVertexArray(lightCubeVAO);
+        //glDrawArrays(GL_TRIANGLES, 0, 36); //for drawing cubes
 
         while (glfwGetTime() < lasttime + 1.0/fpsCap) {
             //FPS
         }
         lasttime += 1.0/fpsCap;
 
+        ImGui::End();
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        glBindVertexArray(0);
+
         //check and swap buffers
         glfwSwapBuffers(window);
         glfwPollEvents();    
+        auto endTime = std::chrono::high_resolution_clock::now();
+        double renderTime = std::chrono::duration<double, std::micro>(endTime - startTime).count();
+        totalRenderTime += renderTime;
     }
     
     // optional: de-allocate all resources once they've outlived their purpose:

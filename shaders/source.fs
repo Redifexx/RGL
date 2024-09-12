@@ -164,8 +164,8 @@ void main()
 
     vec3 result = vec3(0.0f);
     //result += PointLightResult(ptLight, material);
-    //result += DirectionalLightResult(dirLight, material);
-    result += SpotLightResult(spotLight, material);
+    result += DirectionalLightResult(dirLight, material);
+    //result += SpotLightResult(spotLight, material);
     result += ambient;
 
     FragColor = vec4(result, 1.0f);

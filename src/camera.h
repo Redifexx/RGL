@@ -1,3 +1,6 @@
+#ifndef CAMERA_H
+#define CAMERA_H
+
 #include <glad/glad.h>
 #include <GLM/glm.hpp>
 #include <GLM/gtc/matrix_transform.hpp>
@@ -142,3 +145,5 @@ private:
         Up    = glm::normalize(glm::cross(Right, Front));
     }
 };
+
+#endif
