@@ -134,10 +134,10 @@ int main()
 
 
     ////EBO -- disabled for cube
-    ////unsigned int EBO;
-    ////glGenBuffers(1, &EBO);
-    ////glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    ////glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    unsigned int EBO;
+    glGenBuffers(1, &EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cubeIndices), cubeIndices, GL_STATIC_DRAW);
     //// position attribute
     //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     //glEnableVertexAttribArray(0);
@@ -189,8 +189,8 @@ int main()
     glfwSwapInterval(0); // Disables VSync
 
     //Texture - Depricated
-    unsigned int diffuseMap = loadTexture("../textures/barrel_side.png");
-    unsigned int specularMap = loadTexture("../textures/barrel_side_spec.png");
+    unsigned int diffuseMap = loadTexture("../textures/cobblestone.png");
+    unsigned int specularMap = loadTexture("../textures/cobblestone.png");
     
     phongShader.use();
     glUniform1i(glGetUniformLocation(phongShader.ID, "material.diffuse"), 0);
@@ -253,10 +253,10 @@ int main()
 
 
         //Render Stuff
-        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);  
-        glStencilFunc(GL_ALWAYS, 1, 0xFF); // all fragments should pass the stencil test
-        glStencilMask(0xFF); // enable writing to the stencil buffer
-        modelShader.use();
+        //glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);  
+        //glStencilFunc(GL_ALWAYS, 1, 0xFF); // all fragments should pass the stencil test
+        //glStencilMask(0xFF); // enable writing to the stencil buffer
+        phongShader.use();
 
         // Cam Transformations
         glm::mat4 view = camera.GetViewMatrix();
@@ -266,31 +266,31 @@ int main()
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(1.0f));
 
-        glUniformMatrix4fv(glGetUniformLocation(modelShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(glGetUniformLocation(modelShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(glGetUniformLocation(modelShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-        backpack.Draw(modelShader);
+        glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        //backpack.Draw(phongShader);
 
 
 
         // Stencil
-        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-        glStencilMask(0x00); // disable writing to the stencil buffer
-        glDisable(GL_DEPTH_TEST);
-        stencilShader.use();
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(1.0f));
-        glUniformMatrix4fv(glGetUniformLocation(stencilShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(glGetUniformLocation(stencilShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(glGetUniformLocation(stencilShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-        backpack.Draw(stencilShader);
-        glStencilMask(0xFF);
-        glStencilFunc(GL_ALWAYS, 1, 0xFF);   
-        glEnable(GL_DEPTH_TEST);
+        //glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        //glStencilMask(0x00); // disable writing to the stencil buffer
+        //glDisable(GL_DEPTH_TEST);
+        //stencilShader.use();
+        //model = glm::mat4(1.0f);
+        //model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+        //model = glm::scale(model, glm::vec3(1.0f));
+        //glUniformMatrix4fv(glGetUniformLocation(stencilShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        //glUniformMatrix4fv(glGetUniformLocation(stencilShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        //glUniformMatrix4fv(glGetUniformLocation(stencilShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        //backpack.Draw(stencilShader);
+        //glStencilMask(0xFF);
+        //glStencilFunc(GL_ALWAYS, 1, 0xFF);   
+        //glEnable(GL_DEPTH_TEST);
                 
         // Material Settings
-        float materialSpecFactor = 0.6f;
+        float materialSpecFactor = 0.0f;
         float materialEmisFactor = 0.0f;
         float materialShininess = 32.0f;
         glUniform1f(glGetUniformLocation(phongShader.ID, "material.specularFactor"), materialSpecFactor);
@@ -313,10 +313,20 @@ int main()
         
 
         // Cube Pos
-        //model = glm::mat4(1.0f);
-        //model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-        //model = glm::scale(model, glm::vec3(1.0f));
-        //glBindVertexArray(lightVAO);
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(1.0f));
+        glBindVertexArray(lightVAO);
+
+        glm::vec3 curPos(0.0f, 0.0f, 0.0f);
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, curPos);
+        glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        //glDrawArrays(GL_TRIANGLES, 0, 36);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
         //for (int i = 0; i < 16; i++)
         //{
         //    for (int j = 0; j < 16; j++)
@@ -335,10 +345,10 @@ int main()
         //}
 
         //Setting Up Texture
-        //glActiveTexture(GL_TEXTURE0);
-        //glBindTexture(GL_TEXTURE_2D, diffuseMap);
-        //glActiveTexture(GL_TEXTURE1);
-        //glBindTexture(GL_TEXTURE_2D, specularMap);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, diffuseMap);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, specularMap);
 
 
         //lightCubeShader.use();

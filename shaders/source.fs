@@ -134,6 +134,12 @@ vec3 SpotLightResult(SpotLight light, Material material)
     return result;
 }
 
+vec3 NoLightResult(Material material)
+{
+    vec3 result = vec3(texture(material.diffuse, TexCoord).rgb);
+    return result;
+}
+
 
 //uniform PointLight ptLight;
 //uniform DirectionalLight dirLight;
@@ -164,8 +170,9 @@ void main()
 
     vec3 result = vec3(0.0f);
     //result += PointLightResult(ptLight, material);
-    result += DirectionalLightResult(dirLight, material);
+    //result += DirectionalLightResult(dirLight, material);
     //result += SpotLightResult(spotLight, material);
+    result += NoLightResult(material);
     result += ambient;
 
     FragColor = vec4(result, 1.0f);
