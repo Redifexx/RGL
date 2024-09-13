@@ -125,9 +125,12 @@ int main()
     //Shader curShader("../shaders/source.vs", "../shaders/source.fs");
     Shader phongShader("../shaders/source.vs", "../shaders/source.fs");
     Shader modelShader("../shaders/modelLoad.vs", "../shaders/modelLoad.fs");
+    Shader stencilShader("../shaders/objOutline.vs", "../shaders/objOutline.fs");
     Shader lightCubeShader("../shaders/lightCube.vs", "../shaders/lightCube.fs");
+
+
     Model backpack("../models/backpack/backpack.obj");
-    //Model jet("../model/f-16.obj");
+    //Model backpack("../models/gman-toilet/source/GmanToilet.fbx");
 
 
     ////EBO -- disabled for cube
@@ -176,16 +179,22 @@ int main()
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
     glDepthFunc(GL_LESS);
+    //glEnable(GL_CULL_FACE); 
     glCullFace(GL_FRONT);
+
+    //Stencil
+    glEnable(GL_STENCIL_TEST);
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);
+
     glfwSwapInterval(0); // Disables VSync
 
-    //Texture
-    //unsigned int diffuseMap = loadTexture("../textures/barrel_side.png");
-    //unsigned int specularMap = loadTexture("../textures/barrel_side_spec.png");
+    //Texture - Depricated
+    unsigned int diffuseMap = loadTexture("../textures/barrel_side.png");
+    unsigned int specularMap = loadTexture("../textures/barrel_side_spec.png");
     
     phongShader.use();
-    //glUniform1i(glGetUniformLocation(phongShader.ID, "material.diffuse"), 0);
-    //glUniform1i(glGetUniformLocation(phongShader.ID, "material.specularMap"), 1);
+    glUniform1i(glGetUniformLocation(phongShader.ID, "material.diffuse"), 0);
+    glUniform1i(glGetUniformLocation(phongShader.ID, "material.specularMap"), 1);
     //glUniform1i(glGetUniformLocation(lightingShader.ID, "material.specularMap"), 1);
     //glUniform1i(glGetUniformLocation(lightingShader.ID, "material.emissionMap"), 2);
     
@@ -220,7 +229,8 @@ int main()
 
         //Rendering Commands
         glClearColor(0.333f, 0.816f, 0.988f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -243,6 +253,9 @@ int main()
 
 
         //Render Stuff
+        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);  
+        glStencilFunc(GL_ALWAYS, 1, 0xFF); // all fragments should pass the stencil test
+        glStencilMask(0xFF); // enable writing to the stencil buffer
         modelShader.use();
 
         // Cam Transformations
@@ -257,14 +270,32 @@ int main()
         glUniformMatrix4fv(glGetUniformLocation(modelShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(glGetUniformLocation(modelShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
         backpack.Draw(modelShader);
-        
+
+
+
+        // Stencil
+        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        glStencilMask(0x00); // disable writing to the stencil buffer
+        glDisable(GL_DEPTH_TEST);
+        stencilShader.use();
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(1.0f));
+        glUniformMatrix4fv(glGetUniformLocation(stencilShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(glGetUniformLocation(stencilShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(stencilShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        backpack.Draw(stencilShader);
+        glStencilMask(0xFF);
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);   
+        glEnable(GL_DEPTH_TEST);
+                
         // Material Settings
-        //float materialSpecFactor = 0.6f;
-        //float materialEmisFactor = 0.0f;
-        //float materialShininess = 32.0f;
-        //glUniform1f(glGetUniformLocation(phongShader.ID, "material.specularFactor"), materialSpecFactor);
-        //glUniform1f(glGetUniformLocation(phongShader.ID, "material.emissiveFactor"), materialEmisFactor);
-        //glUniform1f(glGetUniformLocation(phongShader.ID, "material.shininess"), materialShininess);
+        float materialSpecFactor = 0.6f;
+        float materialEmisFactor = 0.0f;
+        float materialShininess = 32.0f;
+        glUniform1f(glGetUniformLocation(phongShader.ID, "material.specularFactor"), materialSpecFactor);
+        glUniform1f(glGetUniformLocation(phongShader.ID, "material.emissiveFactor"), materialEmisFactor);
+        glUniform1f(glGetUniformLocation(phongShader.ID, "material.shininess"), materialShininess);
         
         //Light Settings
         glm::vec3 white = glm::vec3(1.0f);
@@ -282,7 +313,7 @@ int main()
         
 
         // Cube Pos
-        model = glm::mat4(1.0f);
+        //model = glm::mat4(1.0f);
         //model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
         //model = glm::scale(model, glm::vec3(1.0f));
         //glBindVertexArray(lightVAO);
