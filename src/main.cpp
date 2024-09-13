@@ -124,6 +124,7 @@ int main()
 
     //Shader curShader("../shaders/source.vs", "../shaders/source.fs");
     Shader phongShader("../shaders/source.vs", "../shaders/source.fs");
+    Shader modelShader("../shaders/modelLoad.vs", "../shaders/modelLoad.fs");
     Shader lightCubeShader("../shaders/lightCube.vs", "../shaders/lightCube.fs");
     Model backpack("../models/backpack/backpack.obj");
     //Model jet("../model/f-16.obj");
@@ -242,7 +243,7 @@ int main()
 
 
         //Render Stuff
-        phongShader.use();
+        modelShader.use();
 
         // Cam Transformations
         glm::mat4 view = camera.GetViewMatrix();
@@ -252,10 +253,10 @@ int main()
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(1.0f));
 
-        glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-        backpack.Draw(phongShader);
+        glUniformMatrix4fv(glGetUniformLocation(modelShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(glGetUniformLocation(modelShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(modelShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        backpack.Draw(modelShader);
         
         // Material Settings
         //float materialSpecFactor = 0.6f;

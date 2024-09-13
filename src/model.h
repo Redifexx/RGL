@@ -13,6 +13,14 @@
 
 unsigned int TextureFromFile(const char *path, const string &directory, bool gamma = false);
 
+
+struct Material {
+    glm::vec3 Diffuse;
+    glm::vec3 Specular;
+    glm::vec3 Ambient;
+    float Shininess;
+};
+
 class Model
 {
     public:
@@ -30,6 +38,7 @@ class Model
         void processNode(aiNode *node, const aiScene *scene);
         Mesh processMesh(aiMesh *mesh, const aiScene *scene);
         vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, string typeName);
+        Material loadMaterial(aiMaterial* mat);
 };
 
 

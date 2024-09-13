@@ -97,6 +97,26 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
                 vector.z = mesh->mBitangents[i].z;
                 vertex.Bitangent = vector;
             }
+
+            /*
+            if (scene->mNumMaterials > mesh->mMaterialIndex)
+            {
+            const auto& mat = scene->mMaterials[mesh->mMaterialIndex];
+            aiColor4D diffuse;
+            if (AI_SUCCESS == aiGetMaterialColor(mat, AI_MATKEY_COLOR_DIFFUSE, &diffuse))
+            {
+                vertex.color = glm::vec4(diffuse.r, diffuse.g, diffuse.b, diffuse.a);
+            }
+
+            if (mat->GetTextureCount(aiTextureType_DIFFUSE) > 0)
+            {
+                vertex.useDiffuseTexture = 1.f;
+            }
+            else
+            {
+                vertex.useDiffuseTexture = 0.f;
+            }
+            */
             //std::cout << "TEXCOORDSEND" << std::endl;
         }
         else
@@ -167,6 +187,27 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type,
         }
     }
     return textures;
+}
+
+Material loadMaterial(aiMaterial* mat)
+{
+    Material material;
+    aiColor3D color(0.f, 0.f, 0.f);
+    float shininess;
+
+    mat->Get(AI_MATKEY_COLOR_DIFFUSE, color);
+    material.Diffuse = glm::vec3(color.r, color.b, color.g);
+
+    mat->Get(AI_MATKEY_COLOR_AMBIENT, color);
+    material.Ambient = glm::vec3(color.r, color.b, color.g);
+
+    mat->Get(AI_MATKEY_COLOR_SPECULAR, color);
+    material.Specular = glm::vec3(color.r, color.b, color.g);
+
+    mat->Get(AI_MATKEY_SHININESS, shininess);
+    material.Shininess = shininess;
+
+    return material;
 }
 
 unsigned int TextureFromFile(const char *path, const string &directory, bool gamma)
