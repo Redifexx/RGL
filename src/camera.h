@@ -18,9 +18,10 @@ enum Camera_Movement
 
 const float YAW = -90.0f;
 const float PITCH = 0.0f;
-const float SPEED = 2.5f;
+const float SPEED = 8.0f;
 const float SENSITIVITY = 0.1f;
-const float ZOOM = 60.0f;
+const float ZOOM = 80.0f;
+const float MULTIPLIER = 1.0f;
 
 
 class Camera 
@@ -41,10 +42,12 @@ public:
     float MovementSpeed;
     float MouseSensitivity;
     float Zoom;
+    float Multiplier_;
+
 
 
     // constructors with vectors
-    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
+    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM), Multiplier_(MULTIPLIER)
     {
         Position = position;
         WorldUp = up;
@@ -54,7 +57,7 @@ public:
     }
 
     // constructor with the scalar values
-    Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
+    Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM), Multiplier_(MULTIPLIER)
     {
         Position = glm::vec3(posX, posY, posZ);
         WorldUp = glm::vec3(upX, upY, upZ);
@@ -70,32 +73,37 @@ public:
     }
 
     //processes input received from any keyboard-like input system. accepts input parameneter in the form of camera defined ENUM (to abstract it from windowing systems)
-    void ProcessKeyboard(Camera_Movement direction, float deltaTime)
+    void ProcessKeyboard(Camera_Movement direction, float deltaTime, bool isShift_)
     {
         float velocity = MovementSpeed * deltaTime;
+        float multiplier = 1.0f;
+        if (isShift_)
+        {
+            multiplier = 2.0f;
+        }
         if (direction == FORWARD)
         {
-            Position += Front * velocity;
+            Position += Front * velocity * multiplier * Multiplier_;
         }
         if (direction == BACKWARD)
         {
-            Position -= Front * velocity;
+            Position -= Front * velocity * multiplier * Multiplier_;
         }
         if (direction == LEFT)
         {
-            Position -= Right * velocity;
+            Position -= Right * velocity * multiplier * Multiplier_;
         }
         if (direction == RIGHT)
         {
-            Position += Right * velocity;
+            Position += Right * velocity * multiplier * Multiplier_;
         }
         if (direction == UP)
         {
-            Position += Up * velocity;
+            Position += WorldUp * velocity * multiplier * Multiplier_;
         }
         if (direction == DOWN)
         {
-            Position -= Up * velocity;
+            Position -= WorldUp * velocity * multiplier * Multiplier_;
         }
     }
 
@@ -124,11 +132,19 @@ public:
     // processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
     void ProcessMouseScroll(float yoffset)
     {
+        /*
         Zoom -= (float)yoffset;
         if (Zoom < 1.0f)
             Zoom = 1.0f;
         if (Zoom > 120.0f)
             Zoom = 120.0f;
+        */
+        Multiplier_ += (float)yoffset / 10.0f;
+        if (Multiplier_ < 0.01f)
+            Multiplier_ = 0.01f;
+        if (Multiplier_ > 120.0f)
+            Multiplier_ = 120.0f;
+        
     }
 private:
     // calculates the front vector from the Camera's (updated) Euler Angles

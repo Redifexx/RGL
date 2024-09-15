@@ -7,7 +7,7 @@ Chunk::Chunk(glm::ivec3 chunkPos_)
 
 void Chunk::GenerateChunk(int** worldMap, int width, int height)
 {
-    std::cout << "Generating Chunk!" << std::endl;
+    //std::cout << "Generating Chunk!" << std::endl;
     for (int i = 0; i < 16; i++)
     {
         for (int j = 0; j < 16; j++)
@@ -35,10 +35,10 @@ void Chunk::GenerateChunk(int** worldMap, int width, int height)
             }
         }
     }
-    std::cout << "Done Generating Chunk!" << std::endl;
+    //std::cout << "Done Generating Chunk!" << std::endl;
     GenerateMesh();
-    std::cout << "Done Generating Chunk Mesh!" << std::endl;
-    std::cout << "Setting Up Chunk Buffers!" << std::endl;
+    //std::cout << "Done Generating Chunk Mesh!" << std::endl;
+    //std::cout << "Setting Up Chunk Buffers!" << std::endl;
     SetupChunkBuffers();
 };
 
@@ -46,7 +46,7 @@ void Chunk::GenerateMesh()
 {
     vertices = new std::vector<float>();
     indices = new std::vector<unsigned int>();
-    std::cout << "Generating Chunk Mesh!" << std::endl;
+    //std::cout << "Generating Chunk Mesh!" << std::endl;
     unsigned int indexOffset = 0;
     for (int i = 0; i < 16; i++)
     {
@@ -100,6 +100,7 @@ void Chunk::GenerateMesh()
                         indexOffset += 4;
                     }
 
+                    /*
                     //std::cout << "Checking Left" << std::endl;
                     if (i == 0 || chunkArr[i-1][j][k]->type == AIR) //LEFT
                     {
@@ -179,6 +180,7 @@ void Chunk::GenerateMesh()
 
                         indexOffset += 4;
                     }
+                    */
                     
                 }
             }
@@ -216,7 +218,7 @@ void Chunk::SetupChunkBuffers()
     glEnableVertexAttribArray(2);
 
     glBindVertexArray(0);
-    std::cout << "Done Setting Up Chunk Buffers!" << std::endl;
+    //std::cout << "Done Setting Up Chunk Buffers!" << std::endl;
 }
 
 void Chunk::RenderChunk()

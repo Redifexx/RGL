@@ -18,7 +18,7 @@ void World::GenerateWorld(std::string seed)
 
     noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
     noise.SetFractalType(FastNoiseLite::FractalType_FBm);
-    noise.SetFractalOctaves(3);
+    noise.SetFractalOctaves(4);
     noise.SetFractalGain(0.5f);
     noise.SetFractalWeightedStrength(-0.5f);
     noise.SetFrequency(0.015f);
@@ -39,7 +39,7 @@ void World::GenerateWorld(std::string seed)
     {
         for (int k = 0; k < 16; k++)
         {
-            std::cout << "CHUNK " << ((i+1) * (k+1)) << std::endl;
+            std::cout << "CHUNK X: " << ((i - 8) * 16) << " CHUNK Z: " << (k - 8) * 16 << std::endl;
             Chunk* curChunk = new Chunk(glm::ivec3((i - 8) * 16, 0, (k - 8) * 16));
 
             int** worldMapPtr = new int*[256];
@@ -52,6 +52,7 @@ void World::GenerateWorld(std::string seed)
             delete[] worldMapPtr;
         }
     }
+    std::cout << "World Done!" << std::endl;
 }
 
 int World::mapFloatToInt(float value)

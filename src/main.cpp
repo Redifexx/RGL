@@ -111,6 +111,13 @@ int main()
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
+    io.Fonts->AddFontFromFileTTF("../fonts/Monocraft.ttf", 20.0f);
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.WindowPadding = ImVec2(0.0f, 0.0f);
+    style.FramePadding = ImVec2(0.0f, 0.0f);
+    style.ItemSpacing = ImVec2(0.0f, 0.0f);
+    style.WindowTitleAlign = ImVec2(0.0f, 0.0f);
+    style.WindowBorderSize = 0.0f;
     // Setup Platform/Renderer bindings
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
@@ -202,6 +209,9 @@ int main()
 
     //IMGUI Stuff
     std::string fpsText = "";
+    std::string xText = ""; 
+    std::string yText = ""; 
+    std::string zText = "";
 
     //Minecraft Stuff
     World myWorld; //Generates World
@@ -228,6 +238,10 @@ int main()
             totalRenderTime = 0.0;
         }
 
+        xText = "X: " + std::to_string(camera.Position.x);
+        yText = "Y: " + std::to_string(camera.Position.y);
+        zText = "Z: " + std::to_string(camera.Position.z);
+
         //Rendering Commands
         glClearColor(0.333f, 0.816f, 0.988f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -247,6 +261,13 @@ int main()
         ImGui::Begin("I'm a Window!", open_ptr, window_flags);
         ImGui::SetCursorPos(ImVec2(20, 20));
         ImGui::Text(fpsText.c_str());
+        ImGui::SetCursorPos(ImVec2(20, 40));
+        ImGui::Text(xText.c_str());
+        ImGui::SetCursorPos(ImVec2(20, 60));
+        ImGui::Text(yText.c_str());
+        ImGui::SetCursorPos(ImVec2(20, 80));
+        ImGui::Text(zText.c_str());
+
 
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
@@ -404,6 +425,7 @@ int main()
 void processInput(GLFWwindow *window)
 {
     float cameraSpeed = 2.5f * deltaTime;
+    bool isShiftDown = false;
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
         glfwSetWindowShouldClose(window, true);
@@ -421,30 +443,39 @@ void processInput(GLFWwindow *window)
         glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
     }
 
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+    {
+        isShiftDown = true;
+    }
+    else
+    {
+        isShiftDown = false;
+    }
+
     //Walking
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
-        camera.ProcessKeyboard(FORWARD, deltaTime);
+        camera.ProcessKeyboard(FORWARD, deltaTime, isShiftDown);
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
     {
-        camera.ProcessKeyboard(BACKWARD, deltaTime);
+        camera.ProcessKeyboard(BACKWARD, deltaTime, isShiftDown);
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
     {
-        camera.ProcessKeyboard(LEFT, deltaTime);
+        camera.ProcessKeyboard(LEFT, deltaTime, isShiftDown);
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     {
-        camera.ProcessKeyboard(RIGHT, deltaTime);
+        camera.ProcessKeyboard(RIGHT, deltaTime, isShiftDown);
     }
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
     {
-        camera.ProcessKeyboard(UP, deltaTime);
+        camera.ProcessKeyboard(UP, deltaTime, isShiftDown);
     }
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
     {
-        camera.ProcessKeyboard(DOWN, deltaTime);
+        camera.ProcessKeyboard(DOWN, deltaTime, isShiftDown);
     }
 }
 

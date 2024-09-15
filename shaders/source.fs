@@ -155,7 +155,7 @@ void main()
     ptLight.intensity = 1.0f;
 
     DirectionalLight dirLight;
-    dirLight.direction = vec3(-1.0f, -1.0f, -1.0f);
+    dirLight.direction = vec3(0.0f, -1.0f, 0.0f);
     dirLight.color = vec3(1.0f);
     dirLight.intensity = 1.0f;
 
