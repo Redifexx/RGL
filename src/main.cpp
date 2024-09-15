@@ -17,6 +17,7 @@
 #include "model.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
+#include "world.h"
 
 // Resizeable Window
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -117,27 +118,21 @@ int main()
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
 
-    unsigned int indices[] = {  // note that we start from 0!
-        0, 1, 3,   // first triangle
-        1, 2, 3
-    };  
-
-    //Shader curShader("../shaders/source.vs", "../shaders/source.fs");
     Shader phongShader("../shaders/source.vs", "../shaders/source.fs");
     Shader modelShader("../shaders/modelLoad.vs", "../shaders/modelLoad.fs");
     Shader stencilShader("../shaders/objOutline.vs", "../shaders/objOutline.fs");
     Shader lightCubeShader("../shaders/lightCube.vs", "../shaders/lightCube.fs");
 
 
-    Model backpack("../models/backpack/backpack.obj");
+    //Model backpack("../models/backpack/backpack.obj");
     //Model backpack("../models/gman-toilet/source/GmanToilet.fbx");
 
 
     ////EBO -- disabled for cube
-    unsigned int EBO;
-    glGenBuffers(1, &EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cubeIndices), cubeIndices, GL_STATIC_DRAW);
+    //unsigned int EBO;
+    //glGenBuffers(1, &EBO);
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cubeIndices), cubeIndices, GL_STATIC_DRAW);
     //// position attribute
     //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     //glEnableVertexAttribArray(0);
@@ -151,36 +146,37 @@ int main()
 
 
     ////VBO
-    unsigned int VBO;
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(cube), cube, GL_STATIC_DRAW);
-
-    //Light VAO
-    unsigned int lightVAO;
-    glGenVertexArrays(1, &lightVAO);
-    glBindVertexArray(lightVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3* sizeof(float)));
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5* sizeof(float)));
-    glEnableVertexAttribArray(2);
-
-    unsigned int lightCubeVAO;
-    glGenVertexArrays(1, &lightCubeVAO);
-    glBindVertexArray(lightCubeVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
+    //unsigned int VBO;
+    //glGenBuffers(1, &VBO);
+    //glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    //glBufferData(GL_ARRAY_BUFFER, sizeof(cube), cube, GL_STATIC_DRAW);
+//
+    ////Light VAO
+    //unsigned int lightVAO;
+    //glGenVertexArrays(1, &lightVAO);
+    //glBindVertexArray(lightVAO);
+    //glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    //glEnableVertexAttribArray(0);
+    //glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3* sizeof(float)));
+    //glEnableVertexAttribArray(1);
+    //glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5* sizeof(float)));
+    //glEnableVertexAttribArray(2);
+//
+    //unsigned int lightCubeVAO;
+    //glGenVertexArrays(1, &lightCubeVAO);
+    //glBindVertexArray(lightCubeVAO);
+    //glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    //glEnableVertexAttribArray(0);
 
     //GL Settings
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
     glDepthFunc(GL_LESS);
     //glEnable(GL_CULL_FACE); 
-    glCullFace(GL_FRONT);
+    //glFrontFace(GL_CCW);
+    //glCullFace(GL_BACK);
 
     //Stencil
     glEnable(GL_STENCIL_TEST);
@@ -207,7 +203,12 @@ int main()
     //IMGUI Stuff
     std::string fpsText = "";
 
+    //Minecraft Stuff
+    World myWorld; //Generates World
+
+
     //MAIN RENDER LOOP
+    std::cout << "RENDER LOOP!" << std::endl;
     while(!glfwWindowShouldClose(window))
     {
         auto startTime = std::chrono::high_resolution_clock::now();
@@ -261,11 +262,9 @@ int main()
         // Cam Transformations
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.001f, 1000.0f);
-
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+        model = glm::translate(model, glm::vec3(0.0f, -20.0f, 0.0f));
         model = glm::scale(model, glm::vec3(1.0f));
-
         glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
         glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
@@ -307,26 +306,37 @@ int main()
         glUniform1f(glGetUniformLocation(phongShader.ID, "spotLight.innerCutOff"), iC);
         glUniform1f(glGetUniformLocation(phongShader.ID, "spotLight.outerCutOff"), oC);
         glUniform1f(glGetUniformLocation(phongShader.ID, "spotLight.intensity"), 1.0f);
-
         glUniform3fv(glGetUniformLocation(phongShader.ID, "viewPos"), 1, glm::value_ptr(camera.Position));
 
-        
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, diffuseMap);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, specularMap);
+
+        for (int i = 0; i < 16; i++)
+        {
+            for (int k = 0; k < 16; k++)
+            {
+                //myWorld.worldChunks[i][k]->SetupChunkBuffers();
+                myWorld.worldChunks[i][k]->RenderChunk();
+            }
+        }
 
         // Cube Pos
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(1.0f));
-        glBindVertexArray(lightVAO);
-
-        glm::vec3 curPos(0.0f, 0.0f, 0.0f);
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, curPos);
-        glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        //model = glm::mat4(1.0f);
+        //model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+        //model = glm::scale(model, glm::vec3(1.0f));
+        ////glBindVertexArray(lightVAO);
+//
+        //glm::vec3 curPos(0.0f, 0.0f, 0.0f);
+        //model = glm::mat4(1.0f);
+        //model = glm::translate(model, curPos);
+        //glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        //glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        //glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
         //glDrawArrays(GL_TRIANGLES, 0, 36);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+        //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        //glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
         //for (int i = 0; i < 16; i++)
         //{
         //    for (int j = 0; j < 16; j++)
@@ -339,16 +349,13 @@ int main()
         //            glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
         //            glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
         //            glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-        //            glDrawArrays(GL_TRIANGLES, 0, 36);
+        //            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        //            glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
         //        }
         //    }
         //}
-
         //Setting Up Texture
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, diffuseMap);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, specularMap);
+
 
 
         //lightCubeShader.use();
@@ -385,8 +392,8 @@ int main()
     
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
-    glDeleteVertexArrays(1, &lightVAO);
-    glDeleteBuffers(1, &VBO);
+    //glDeleteVertexArrays(1, &lightVAO);
+    //glDeleteBuffers(1, &VBO);
 
     glfwTerminate();
     return 0;
