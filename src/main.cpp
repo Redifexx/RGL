@@ -215,6 +215,15 @@ int main()
 
     //Minecraft Stuff
     World myWorld; //Generates World
+    for (int i = 0; i < 16; i++)
+    {
+        for (int k = 0; k < 16; k++)
+        {
+            //myWorld.worldChunks[i][k]->SetupChunkBuffers();
+            std::cout << "X: " << myWorld.worldChunks[i][k]->chunkPos.x << "Y: " << myWorld.worldChunks[i][k]->chunkPos.y << "Z: " << myWorld.worldChunks[i][k]->chunkPos.z << std::endl;
+
+        }
+    }
 
 
     //MAIN RENDER LOOP

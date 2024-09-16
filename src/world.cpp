@@ -29,7 +29,8 @@ void World::GenerateWorld(std::string seed)
     {
         for (int k = 0; k < 256; k++)
         {
-            worldMap[i][k] = mapFloatToInt(noise.GetNoise((float)i, (float)k));
+            ///worldMap[i][k] = mapFloatToInt(noise.GetNoise((float)i, (float)k));
+            worldMap[i][k] = mapFloatToInt(0.8f);
         }
     }
 

@@ -100,7 +100,7 @@ void Chunk::GenerateMesh()
                         indexOffset += 4;
                     }
 
-                    /*
+                    
                     //std::cout << "Checking Left" << std::endl;
                     if (i == 0 || chunkArr[i-1][j][k]->type == AIR) //LEFT
                     {
@@ -120,7 +120,7 @@ void Chunk::GenerateMesh()
 
                         indexOffset += 4;
                     }
-                    
+                    /*
                     //std::cout << "Checking Right" << std::endl;
                     if (i == 15 || chunkArr[i+1][j][k]->type == AIR) //Right
                     {
