@@ -29,8 +29,8 @@ void World::GenerateWorld(std::string seed)
     {
         for (int k = 0; k < 256; k++)
         {
-            ///worldMap[i][k] = mapFloatToInt(noise.GetNoise((float)i, (float)k));
-            worldMap[i][k] = mapFloatToInt(0.8f);
+            worldMap[i][k] = mapFloatToInt(noise.GetNoise((float)i, (float)k));
+            //worldMap[i][k] = mapFloatToInt(0.8f);
         }
     }
 
@@ -40,7 +40,6 @@ void World::GenerateWorld(std::string seed)
     {
         for (int k = 0; k < 16; k++)
         {
-            std::cout << "CHUNK X: " << ((i - 8) * 16) << " CHUNK Z: " << (k - 8) * 16 << std::endl;
             Chunk* curChunk = new Chunk(glm::ivec3((i - 8) * 16, 0, (k - 8) * 16));
 
             int** worldMapPtr = new int*[256];
@@ -49,6 +48,7 @@ void World::GenerateWorld(std::string seed)
                 worldMapPtr[c] = worldMap[c];
             }
             curChunk->GenerateChunk(worldMapPtr, 256, 256);
+            //std::cout << "i: " << i << " z: " << k << " Chunk X: " << curChunk->chunkPos.x << " Z: " << curChunk->chunkPos.z << std::endl;
             worldChunks[i][k] = curChunk;
             delete[] worldMapPtr;
         }

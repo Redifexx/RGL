@@ -7,10 +7,12 @@
 class Chunk
 {
 public:
-    Block* chunkArr[16][16][16];
+    Block* chunkArr[16][16][16] = {nullptr};
+    Chunk* neighboringChunks[6];
     glm::ivec3 chunkPos;
     std::vector<float>* vertices;
     std::vector<unsigned int>* indices;
+    bool hasRendered = false;
 
     unsigned int cVAO, cVBO, cEBO;
     Chunk(glm::ivec3 chunkPos_ = glm::ivec3(0, 0, 0));

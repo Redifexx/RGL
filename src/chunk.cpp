@@ -10,14 +10,15 @@ void Chunk::GenerateChunk(int** worldMap, int width, int height)
     //std::cout << "Generating Chunk!" << std::endl;
     for (int i = 0; i < 16; i++)
     {
-        for (int j = 0; j < 16; j++)
+        for (int k = 0; k < 16; k++)
         {
-            for (int k = 0; k < 16; k++)
+            for (int j = 0; j < 16; j++)
             {
                 Block* curBlock = new Block();
                 curBlock->pos = glm::ivec3(i, j, k);
                 BLOCK_TYPE bt;
                 bt = AIR;
+
                 if (j < worldMap[(this->chunkPos.x + i) + 128][(this->chunkPos.z + k) + 128])
                 {
                     //if (j < 12)
@@ -50,18 +51,15 @@ void Chunk::GenerateMesh()
     unsigned int indexOffset = 0;
     for (int i = 0; i < 16; i++)
     {
-        for (int j = 0; j < 16; j++)
+        for (int k = 0; k < 16; k++)
         {
-            for (int k = 0; k < 16; k++)
+            for (int j = 0; j < 16; j++)
             {
                 if (chunkArr[i][j][k]->type != AIR)
                 {
                     //Check All 6 Sides
-                    //std::cout << "Checking Top" << std::endl;
                     if (j == 15 || chunkArr[i][j+1][k]->type == AIR) //TOP
                     {
-                        //std::cout << "Block position: " << i << ", " << j << ", " << k << std::endl;
-                        //std::cout << "Block type: " << chunkArr[i][j+1][k]->type << std::endl;
                         float cubeTop[] = { //Pos, Tex, Normal
                             this->chunkPos.x + i + -0.5f,      this->chunkPos.y + j + 0.5f, this->chunkPos.z + k  + -0.5f,  0.0f, 1.0f,     0.0f,  1.0f,  0.0f, // TOP FACE
                             this->chunkPos.x + i + 0.5f,       this->chunkPos.y + j + 0.5f, this->chunkPos.z + k  + -0.5f,  1.0f, 1.0f,     0.0f,  1.0f,  0.0f,
@@ -120,7 +118,7 @@ void Chunk::GenerateMesh()
 
                         indexOffset += 4;
                     }
-                    /*
+                    
                     //std::cout << "Checking Right" << std::endl;
                     if (i == 15 || chunkArr[i+1][j][k]->type == AIR) //Right
                     {
@@ -180,7 +178,6 @@ void Chunk::GenerateMesh()
 
                         indexOffset += 4;
                     }
-                    */
                     
                 }
             }
@@ -188,11 +185,11 @@ void Chunk::GenerateMesh()
     }
 
     //Upload Vertex and Index Data
-    glBindBuffer(GL_ARRAY_BUFFER, this->cVBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices->size() * sizeof(float), vertices->data(), GL_STATIC_DRAW);
+    //glBindBuffer(GL_ARRAY_BUFFER, this->cVBO);
+    //glBufferData(GL_ARRAY_BUFFER, vertices->size() * sizeof(float), vertices->data(), GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->cEBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices->size() * sizeof(unsigned int), indices->data(), GL_STATIC_DRAW);
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->cEBO);
+    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices->size() * sizeof(unsigned int), indices->data(), GL_STATIC_DRAW);
     
 }
 
@@ -223,6 +220,19 @@ void Chunk::SetupChunkBuffers()
 
 void Chunk::RenderChunk()
 {
+    //if (!hasRendered)
+    //{
+    //    for (int i = 0; i < vertices->size(); i += 8)
+    //    {
+    //        std::cout << "V: ";
+    //        for (int j = 0; j < 3; j++)
+    //        {
+    //            std::cout << vertices->at(i + j) << " ";
+    //        }
+    //        std::cout << std::endl;
+    //    }
+    //    hasRendered = true;
+    //}
     glBindVertexArray(this->cVAO);
     glDrawElements(GL_TRIANGLES, indices->size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);

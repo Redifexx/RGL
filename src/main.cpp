@@ -40,13 +40,13 @@ unsigned int loadTexture(char const* path);
 // Screen Resolution
 const unsigned int SCR_WIDTH = 900;
 const unsigned int SCR_HEIGHT = 900;
-float fpsCap = 170000.0f;
+float fpsCap = 600000.0f;
 
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 
 // mouse cursor initialization + CAM
-Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
+Camera camera(glm::vec3(0.0f, 18.0f, 0.0f));
 
 //Cursor Lock
 float lastX = SCR_WIDTH / 2.0f;
@@ -65,8 +65,8 @@ void calculateDeltaTime()
 
 
 //Light Positions
-glm::vec3 lightPos(8.0f, 1.0f, 8.0f);
-glm::vec3 cubePos(0.0f, 0.0f, 0.0f);
+//glm::vec3 lightPos(8.0f, 1.0f, 8.0f);
+//glm::vec3 cubePos(0.0f, 0.0f, 0.0f);
 
 //FUTURE OPTIMIZATION: DO MODEL, VIEW,  PROJECTION ON CPU
 
@@ -186,14 +186,14 @@ int main()
     //glCullFace(GL_BACK);
 
     //Stencil
-    glEnable(GL_STENCIL_TEST);
-    glStencilFunc(GL_ALWAYS, 1, 0xFF);
+    //glEnable(GL_STENCIL_TEST);
+    //glStencilFunc(GL_ALWAYS, 1, 0xFF);
 
     glfwSwapInterval(0); // Disables VSync
 
     //Texture - Depricated
-    unsigned int diffuseMap = loadTexture("../textures/cobblestone.png");
-    unsigned int specularMap = loadTexture("../textures/cobblestone.png");
+    unsigned int diffuseMap = loadTexture("../textures/grass_top.png");
+    unsigned int specularMap = loadTexture("../textures/grass_top.png");
     
     phongShader.use();
     glUniform1i(glGetUniformLocation(phongShader.ID, "material.diffuse"), 0);
@@ -215,15 +215,7 @@ int main()
 
     //Minecraft Stuff
     World myWorld; //Generates World
-    for (int i = 0; i < 16; i++)
-    {
-        for (int k = 0; k < 16; k++)
-        {
-            //myWorld.worldChunks[i][k]->SetupChunkBuffers();
-            std::cout << "X: " << myWorld.worldChunks[i][k]->chunkPos.x << "Y: " << myWorld.worldChunks[i][k]->chunkPos.y << "Z: " << myWorld.worldChunks[i][k]->chunkPos.z << std::endl;
-
-        }
-    }
+    
 
 
     //MAIN RENDER LOOP
@@ -259,6 +251,7 @@ int main()
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+        
         ImGuiWindowFlags window_flags = 0;
         window_flags |= ImGuiWindowFlags_NoBackground;
         window_flags |= ImGuiWindowFlags_NoTitleBar;
@@ -266,6 +259,7 @@ int main()
         window_flags |= ImGuiWindowFlags_NoResize;
 
         ImGui::SetNextWindowSize(ImVec2(900, 900)); 
+        ImGui::SetNextWindowPos(ImVec2(0, 0));
         bool * open_ptr = nullptr;
         ImGui::Begin("I'm a Window!", open_ptr, window_flags);
         ImGui::SetCursorPos(ImVec2(20, 20));
@@ -293,8 +287,8 @@ int main()
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.001f, 1000.0f);
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, -20.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(1.0f));
+        //model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+        //model = glm::scale(model, glm::vec3(1.0f));
         glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
         glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
@@ -343,11 +337,10 @@ int main()
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, specularMap);
 
-        for (int i = 0; i < 16; i++)
+        for (int i = 0; i < 15; i++)
         {
-            for (int k = 0; k < 16; k++)
+            for (int k = 0; k < 15; k++)
             {
-                //myWorld.worldChunks[i][k]->SetupChunkBuffers();
                 myWorld.worldChunks[i][k]->RenderChunk();
             }
         }
