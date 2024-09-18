@@ -11,7 +11,12 @@ enum BLOCK_TYPE
 {
     AIR,
     STONE,
-    GRASS
+    GOLD,
+    GRASS,
+    GRAVEL,
+    IRON,
+    ROSE,
+    SPONGE
 };
 
 class Block

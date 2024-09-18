@@ -61,10 +61,10 @@ void Chunk::GenerateMesh()
                     if (j == 15 || chunkArr[i][j+1][k]->type == AIR) //TOP
                     {
                         float cubeTop[] = { //Pos, Tex, Normal
-                            this->chunkPos.x + i + -0.5f,      this->chunkPos.y + j + 0.5f, this->chunkPos.z + k  + -0.5f,  0.0f, 1.0f,     0.0f,  1.0f,  0.0f, // TOP FACE
-                            this->chunkPos.x + i + 0.5f,       this->chunkPos.y + j + 0.5f, this->chunkPos.z + k  + -0.5f,  1.0f, 1.0f,     0.0f,  1.0f,  0.0f,
+                            this->chunkPos.x + i + -0.5f,      this->chunkPos.y + j + 0.5f,  this->chunkPos.z + k +  0.5f,   0.0f, 0.0f,     0.0f,  1.0f,  0.0f,
                             this->chunkPos.x + i + 0.5f,       this->chunkPos.y + j + 0.5f, this->chunkPos.z + k  +  0.5f,  1.0f, 0.0f,     0.0f,  1.0f,  0.0f,
-                            this->chunkPos.x + i + -0.5f,      this->chunkPos.y + j + 0.5f,  this->chunkPos.z + k +  0.5f,   0.0f, 0.0f,     0.0f,  1.0f,  0.0f
+                            this->chunkPos.x + i + 0.5f,       this->chunkPos.y + j + 0.5f, this->chunkPos.z + k  + -0.5f,  1.0f, 1.0f,     0.0f,  1.0f,  0.0f,
+                            this->chunkPos.x + i + -0.5f,      this->chunkPos.y + j + 0.5f, this->chunkPos.z + k  + -0.5f,  0.0f, 1.0f,     0.0f,  1.0f,  0.0f
                         };
 
                         vertices->insert(vertices->end(), std::begin(cubeTop), std::end(cubeTop));
@@ -103,10 +103,10 @@ void Chunk::GenerateMesh()
                     if (i == 0 || chunkArr[i-1][j][k]->type == AIR) //LEFT
                     {
                         float cubeLeft[] = { //Pos, Tex, Normal
-                           this->chunkPos.x + i + -0.5f, this->chunkPos.y + j +  0.5f, this->chunkPos.z + k +  0.5f,    1.0f, 1.0f,     -1.0f, 0.0f, 0.0f, //LEFT
-                           this->chunkPos.x + i + -0.5f, this->chunkPos.y + j +  0.5f, this->chunkPos.z + k + -0.5f,    0.0f, 1.0f,     -1.0f, 0.0f, 0.0f,
-                           this->chunkPos.x + i + -0.5f, this->chunkPos.y + j + -0.5f, this->chunkPos.z + k + -0.5f,    0.0f, 0.0f,     -1.0f, 0.0f, 0.0f,
-                           this->chunkPos.x + i + -0.5f, this->chunkPos.y + j + -0.5f, this->chunkPos.z + k +  0.5f,    1.0f, 0.0f,     -1.0f, 0.0f, 0.0f
+                            this->chunkPos.x + i + -0.5f, this->chunkPos.y + j + -0.5f, this->chunkPos.z + k + -0.5f,    0.0f, 0.0f,     -1.0f, 0.0f, 0.0f,
+                            this->chunkPos.x + i + -0.5f, this->chunkPos.y + j + -0.5f, this->chunkPos.z + k +  0.5f,    1.0f, 0.0f,     -1.0f, 0.0f, 0.0f,
+                            this->chunkPos.x + i + -0.5f, this->chunkPos.y + j +  0.5f, this->chunkPos.z + k +  0.5f,    1.0f, 1.0f,     -1.0f, 0.0f, 0.0f, //LEFT
+                            this->chunkPos.x + i + -0.5f, this->chunkPos.y + j +  0.5f, this->chunkPos.z + k + -0.5f,    0.0f, 1.0f,     -1.0f, 0.0f, 0.0f
                         };
 
                         vertices->insert(vertices->end(), std::begin(cubeLeft), std::end(cubeLeft));
@@ -123,10 +123,10 @@ void Chunk::GenerateMesh()
                     if (i == 15 || chunkArr[i+1][j][k]->type == AIR) //Right
                     {
                         float cubeRight[] = { //Pos, Tex, Normal
-                           this->chunkPos.x + i + 0.5f, this->chunkPos.y + j +  0.5f, this->chunkPos.z + k +  0.5f,     0.0f, 1.0f,     1.0f,  0.0f,  0.0f, //RIGHT
-                           this->chunkPos.x + i + 0.5f, this->chunkPos.y + j +  0.5f, this->chunkPos.z + k + -0.5f,     1.0f, 1.0f,     1.0f,  0.0f,  0.0f,
-                           this->chunkPos.x + i + 0.5f, this->chunkPos.y + j + -0.5f, this->chunkPos.z + k + -0.5f,     1.0f, 0.0f,     1.0f,  0.0f,  0.0f,
-                           this->chunkPos.x + i + 0.5f, this->chunkPos.y + j + -0.5f, this->chunkPos.z + k +  0.5f,     0.0f, 0.0f,     1.0f,  0.0f,  0.0f
+                            this->chunkPos.x + i + 0.5f, this->chunkPos.y + j + -0.5f, this->chunkPos.z + k +  0.5f,     0.0f, 0.0f,     1.0f,  0.0f,  0.0f,
+                            this->chunkPos.x + i + 0.5f, this->chunkPos.y + j + -0.5f, this->chunkPos.z + k + -0.5f,     1.0f, 0.0f,     1.0f,  0.0f,  0.0f,
+                            this->chunkPos.x + i + 0.5f, this->chunkPos.y + j +  0.5f, this->chunkPos.z + k + -0.5f,     1.0f, 1.0f,     1.0f,  0.0f,  0.0f,
+                            this->chunkPos.x + i + 0.5f, this->chunkPos.y + j +  0.5f, this->chunkPos.z + k +  0.5f,     0.0f, 1.0f,     1.0f,  0.0f,  0.0f
                         };
 
                         vertices->insert(vertices->end(), std::begin(cubeRight), std::end(cubeRight));
@@ -163,10 +163,10 @@ void Chunk::GenerateMesh()
                     if (k == 0 || chunkArr[i][j][k-1]->type == AIR) //Back
                     {
                         float cubeBack[] = { //Pos, Tex, Normal
-                           this->chunkPos.x + i + -0.5f, this->chunkPos.y + j +  -0.5f, this->chunkPos.z + k +  -0.5f,    1.0f, 0.0f,     0.0f, 0.0f, -1.0f, //BACK
-                           this->chunkPos.x + i + 0.5f,  this->chunkPos.y + j + -0.5f,  this->chunkPos.z + k + -0.5f,    0.0f, 0.0f,     0.0f, 0.0f, -1.0f,
-                           this->chunkPos.x + i + 0.5f,  this->chunkPos.y + j +  0.5f,  this->chunkPos.z + k + -0.5f,    0.0f, 1.0f,     0.0f, 0.0f, -1.0f,
-                           this->chunkPos.x + i + -0.5f, this->chunkPos.y + j +   0.5f, this->chunkPos.z + k +  -0.5f,    1.0f, 1.0f,     0.0f, 0.0f, -1.0f
+                            this->chunkPos.x + i + 0.5f,  this->chunkPos.y + j + -0.5f,  this->chunkPos.z + k + -0.5f,    0.0f, 0.0f,     0.0f, 0.0f, -1.0f,
+                            this->chunkPos.x + i + -0.5f, this->chunkPos.y + j +  -0.5f, this->chunkPos.z + k +  -0.5f,    1.0f, 0.0f,     0.0f, 0.0f, -1.0f,
+                            this->chunkPos.x + i + -0.5f, this->chunkPos.y + j +   0.5f, this->chunkPos.z + k +  -0.5f,    1.0f, 1.0f,     0.0f, 0.0f, -1.0f,
+                            this->chunkPos.x + i + 0.5f,  this->chunkPos.y + j +  0.5f,  this->chunkPos.z + k + -0.5f,    0.0f, 1.0f,     0.0f, 0.0f, -1.0f
                         };
 
                         vertices->insert(vertices->end(), std::begin(cubeBack), std::end(cubeBack));
