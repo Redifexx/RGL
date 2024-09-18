@@ -20,6 +20,7 @@ public:
     glm::ivec3 pos;
     BLOCK_TYPE type;
     Block(glm::ivec3 pos_ = glm::ivec3(0), BLOCK_TYPE type_ = AIR);
+    glm::vec2 GetBlockTexCoords();
 };
 
 #endif

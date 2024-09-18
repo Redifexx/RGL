@@ -147,7 +147,7 @@ vec3 NoLightResult(Material material)
 void main()
 {
     // Ambient
-    vec3 ambient = vec3(1.0f) * 0.4f * vec3(texture(material.diffuse, TexCoord));
+    vec3 ambient = vec3(1.0f) * 0.25f * vec3(texture(material.diffuse, TexCoord));
 
     PointLight ptLight;
     ptLight.position = vec3(8.0f, 1.0f, 8.0f);
@@ -155,7 +155,7 @@ void main()
     ptLight.intensity = 1.0f;
 
     DirectionalLight dirLight;
-    dirLight.direction = vec3(0.0f, -1.0f, 0.0f);
+    dirLight.direction = vec3(0.3f, -1.0f, 0.7f);
     dirLight.color = vec3(1.0f);
     dirLight.intensity = 1.0f;
 
@@ -171,7 +171,7 @@ void main()
     vec3 result = vec3(0.0f);
     //result += PointLightResult(ptLight, material);
     result += DirectionalLightResult(dirLight, material);
-    result += SpotLightResult(spotLight, material);
+    //result += SpotLightResult(spotLight, material);
     //result += NoLightResult(material);
     result += ambient;
 
