@@ -21,15 +21,15 @@ void Chunk::GenerateChunk(int** worldMap, int width, int height)
 
                 if (j < worldMap[(this->chunkPos.x + i) + 128][(this->chunkPos.z + k) + 128])
                 {
-                    //if (j < 12)
-                    //{
-                    //    bt = STONE;
-                    //}
-                    //else
-                    //{
-                    //    bt = GRASS;
-                    //}
-                    bt = STONE;
+                    if (j < 12)
+                    {
+                        bt = STONE;
+                    }
+                    else
+                    {
+                        bt = GRASS;
+                    }
+                    //bt = GRASS;
                 }
                 curBlock->type = bt;
                 chunkArr[i][j][k] = curBlock;
@@ -49,6 +49,7 @@ void Chunk::GenerateMesh()
     indices = new std::vector<unsigned int>();
     //std::cout << "Generating Chunk Mesh!" << std::endl;
     unsigned int indexOffset = 0;
+    std::vector<glm::vec2> texCoords_;
     for (int i = 0; i < 16; i++)
     {
         for (int k = 0; k < 16; k++)
@@ -66,6 +67,14 @@ void Chunk::GenerateMesh()
                             this->chunkPos.x + i + 0.5f,       this->chunkPos.y + j + 0.5f, this->chunkPos.z + k  + -0.5f,  1.0f, 1.0f,     0.0f,  1.0f,  0.0f,
                             this->chunkPos.x + i + -0.5f,      this->chunkPos.y + j + 0.5f, this->chunkPos.z + k  + -0.5f,  0.0f, 1.0f,     0.0f,  1.0f,  0.0f
                         };
+
+                        for (int t = 0; t < 4; t++)
+                        {
+                            cubeTop[(8 * t) + 4] = texCoords_[t].x;
+                            cubeTop[(8 * t) + 5] = texCoords_[t].y;
+                        }
+                        texCoords_.erase(std::next(texCoords_.begin(), 0), std::next(texCoords_.begin(), 3)); // might break
+
 
                         vertices->insert(vertices->end(), std::begin(cubeTop), std::end(cubeTop));
 
@@ -88,6 +97,13 @@ void Chunk::GenerateMesh()
                            this->chunkPos.x + i + -0.5f,  this->chunkPos.y + j + -0.5f,  this->chunkPos.z + k +  0.5f,    0.0f, 1.0f,     0.0f, -1.0f,  0.0f
                         };
 
+                        for (int t = 0; t < 4; t++)
+                        {
+                            cubeBottom[(8 * t) + 4] = texCoords_[t].x;
+                            cubeBottom[(8 * t) + 5] = texCoords_[t].y;
+                        }
+                        texCoords_.erase(std::next(texCoords_.begin(), 0), std::next(texCoords_.begin(), 3)); // might break
+
                         vertices->insert(vertices->end(), std::begin(cubeBottom), std::end(cubeBottom));
 
                         indices->insert(indices->end(), {
@@ -109,6 +125,13 @@ void Chunk::GenerateMesh()
                             this->chunkPos.x + i + -0.5f, this->chunkPos.y + j +  0.5f, this->chunkPos.z + k + -0.5f,    0.0f, 1.0f,     -1.0f, 0.0f, 0.0f
                         };
 
+                        for (int t = 0; t < 4; t++)
+                        {
+                            cubeLeft[(8 * t) + 4] = texCoords_[t].x;
+                            cubeLeft[(8 * t) + 5] = texCoords_[t].y;
+                        }
+                        texCoords_.erase(std::next(texCoords_.begin(), 0), std::next(texCoords_.begin(), 3)); // might break
+
                         vertices->insert(vertices->end(), std::begin(cubeLeft), std::end(cubeLeft));
 
                         indices->insert(indices->end(), {
@@ -128,6 +151,14 @@ void Chunk::GenerateMesh()
                             this->chunkPos.x + i + 0.5f, this->chunkPos.y + j +  0.5f, this->chunkPos.z + k + -0.5f,     1.0f, 1.0f,     1.0f,  0.0f,  0.0f,
                             this->chunkPos.x + i + 0.5f, this->chunkPos.y + j +  0.5f, this->chunkPos.z + k +  0.5f,     0.0f, 1.0f,     1.0f,  0.0f,  0.0f
                         };
+
+
+                        for (int t = 0; t < 4; t++)
+                        {
+                            cubeRight[(8 * t) + 4] = texCoords_[t].x;
+                            cubeRight[(8 * t) + 5] = texCoords_[t].y;
+                        }
+                        texCoords_.erase(std::next(texCoords_.begin(), 0), std::next(texCoords_.begin(), 3)); // might break
 
                         vertices->insert(vertices->end(), std::begin(cubeRight), std::end(cubeRight));
 
@@ -149,6 +180,13 @@ void Chunk::GenerateMesh()
                            this->chunkPos.x + i + -0.5f, this->chunkPos.y + j +  0.5f, this->chunkPos.z + k + 0.5f,    0.0f, 1.0f,     0.0f, 0.0f, 1.0f
                         };
 
+                        for (int t = 0; t < 4; t++)
+                        {
+                            cubeFront[(8 * t) + 4] = texCoords_[t].x;
+                            cubeFront[(8 * t) + 5] = texCoords_[t].y;
+                        }
+                        texCoords_.erase(std::next(texCoords_.begin(), 0), std::next(texCoords_.begin(), 3)); // might break
+
                         vertices->insert(vertices->end(), std::begin(cubeFront), std::end(cubeFront));
 
                         indices->insert(indices->end(), {
@@ -168,6 +206,13 @@ void Chunk::GenerateMesh()
                             this->chunkPos.x + i + -0.5f, this->chunkPos.y + j +   0.5f, this->chunkPos.z + k +  -0.5f,    1.0f, 1.0f,     0.0f, 0.0f, -1.0f,
                             this->chunkPos.x + i + 0.5f,  this->chunkPos.y + j +  0.5f,  this->chunkPos.z + k + -0.5f,    0.0f, 1.0f,     0.0f, 0.0f, -1.0f
                         };
+
+                        for (int t = 0; t < 4; t++)
+                        {
+                            cubeBack[(8 * t) + 4] = texCoords_[t].x;
+                            cubeBack[(8 * t) + 5] = texCoords_[t].y;
+                        }
+                        texCoords_.erase(std::next(texCoords_.begin(), 0), std::next(texCoords_.begin(), 3)); // might break
 
                         vertices->insert(vertices->end(), std::begin(cubeBack), std::end(cubeBack));
 

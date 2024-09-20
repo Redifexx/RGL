@@ -15,6 +15,7 @@ std::vector<glm::vec2> Block::GetBlockTexCoords()
     std::vector<glm::vec2> texRight;
     std::vector<glm::vec2> texFront;
     std::vector<glm::vec2> texBack;
+    
     std::vector<glm::vec2> texCoords;
 
     switch(this->type)
@@ -286,5 +287,41 @@ std::vector<glm::vec2> Block::GetBlockTexCoords()
             break;
     }
 
-    return glm::vec2(0.0f, 0.0f);
+    //Top Verts
+    for (int i = 0; i < texRight.size(); i++)
+    {
+        texCoords.push_back(texRight[i]);
+    }
+
+    //Bottom
+    for (int i = 0; i < texBottom.size(); i++)
+    {
+        texCoords.push_back(texBottom[i]);
+    }
+
+    //Left
+    for (int i = 0; i < texLeft.size(); i++)
+    {
+        texCoords.push_back(texLeft[i]);
+    }
+
+    //Right
+    for (int i = 0; i < texRight.size(); i++)
+    {
+        texCoords.push_back(texRight[i]);
+    }
+
+    //Front
+    for (int i = 0; i < texFront.size(); i++)
+    {
+        texCoords.push_back(texFront[i]);
+    }
+
+    //Back
+    for (int i = 0; i < texBack.size(); i++)
+    {
+        texCoords.push_back(texBack[i]);
+    }
+
+    return texCoords;
 }

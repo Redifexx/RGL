@@ -192,8 +192,8 @@ int main()
     glfwSwapInterval(0); // Disables VSync
 
     //Texture - Depricated
-    unsigned int diffuseMap = loadTexture("../textures/grass_top.png");
-    unsigned int specularMap = loadTexture("../textures/grass_top.png");
+    unsigned int diffuseMap = loadTexture("../textures/mc_ss.png");
+    unsigned int specularMap = loadTexture("../textures/mc_ss.png");
     
     phongShader.use();
     glUniform1i(glGetUniformLocation(phongShader.ID, "material.diffuse"), 0);
