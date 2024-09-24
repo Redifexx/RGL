@@ -52,10 +52,10 @@ std::vector<glm::vec2> Block::GetBlockTexCoords()
             texFront.push_back(glm::vec2(0.0f, 1.0f));
 
             // Back
-            texRight.push_back(glm::vec2(0.0f, 0.9375f));
-            texRight.push_back(glm::vec2(0.0625f, 0.9375f));
-            texRight.push_back(glm::vec2(0.0625f, 1.0f));
-            texRight.push_back(glm::vec2(0.0f, 1.0f));
+            texBack.push_back(glm::vec2(0.0f, 0.9375f));
+            texBack.push_back(glm::vec2(0.0625f, 0.9375f));
+            texBack.push_back(glm::vec2(0.0625f, 1.0f));
+            texBack.push_back(glm::vec2(0.0f, 1.0f));
             break;
 
         case GOLD:
@@ -90,10 +90,10 @@ std::vector<glm::vec2> Block::GetBlockTexCoords()
             texFront.push_back(glm::vec2(0.125f, 1.0f));
 
             // Back
-            texRight.push_back(glm::vec2(0.125f, 0.9375f)); 
-            texRight.push_back(glm::vec2(0.1875f, 0.9375f));
-            texRight.push_back(glm::vec2(0.1875f, 1.0f));
-            texRight.push_back(glm::vec2(0.125f, 1.0f));
+            texBack.push_back(glm::vec2(0.125f, 0.9375f)); 
+            texBack.push_back(glm::vec2(0.1875f, 0.9375f));
+            texBack.push_back(glm::vec2(0.1875f, 1.0f));
+            texBack.push_back(glm::vec2(0.125f, 1.0f));
             break;
             
         case GRASS:
@@ -288,9 +288,9 @@ std::vector<glm::vec2> Block::GetBlockTexCoords()
     }
 
     //Top Verts
-    for (int i = 0; i < texRight.size(); i++)
+    for (int i = 0; i < texTop.size(); i++)
     {
-        texCoords.push_back(texRight[i]);
+        texCoords.push_back(texTop[i]);
     }
 
     //Bottom
