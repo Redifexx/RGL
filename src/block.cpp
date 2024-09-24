@@ -22,10 +22,10 @@ std::vector<glm::vec2> Block::GetBlockTexCoords()
     {
         case STONE:
             //Top
-            texCoords.push_back(glm::vec2(0.0f, 0.9375f));
-            texCoords.push_back(glm::vec2(0.0625f, 0.9375f));
-            texCoords.push_back(glm::vec2(0.0625f, 1.0f));
-            texCoords.push_back(glm::vec2(0.0f, 1.0f));
+            texTop.push_back(glm::vec2(0.0f, 0.9375f));
+            texTop.push_back(glm::vec2(0.0625f, 0.9375f));
+            texTop.push_back(glm::vec2(0.0625f, 1.0f));
+            texTop.push_back(glm::vec2(0.0f, 1.0f));
 
             // Bottom
             texBottom.push_back(glm::vec2(0.0f, 0.9375f));
@@ -128,10 +128,10 @@ std::vector<glm::vec2> Block::GetBlockTexCoords()
             texFront.push_back(glm::vec2(0.1875f, 1.0f));
 
             // Back
-            texRight.push_back(glm::vec2(0.1875f, 0.9375f));
-            texRight.push_back(glm::vec2(0.25f, 0.9375f));
-            texRight.push_back(glm::vec2(0.25f, 1.0f));
-            texRight.push_back(glm::vec2(0.1875f, 1.0f));
+            texBack.push_back(glm::vec2(0.1875f, 0.9375f));
+            texBack.push_back(glm::vec2(0.25f, 0.9375f));
+            texBack.push_back(glm::vec2(0.25f, 1.0f));
+            texBack.push_back(glm::vec2(0.1875f, 1.0f));
             break;
 
         case GRAVEL:
@@ -166,10 +166,10 @@ std::vector<glm::vec2> Block::GetBlockTexCoords()
             texFront.push_back(glm::vec2(0.3125f, 1.0f));
 
             // Back
-            texRight.push_back(glm::vec2(0.3125f, 0.9375f));
-            texRight.push_back(glm::vec2(0.375f, 0.9375f));
-            texRight.push_back(glm::vec2(0.375f, 1.0f));
-            texRight.push_back(glm::vec2(0.3125f, 1.0f));
+            texBack.push_back(glm::vec2(0.3125f, 0.9375f));
+            texBack.push_back(glm::vec2(0.375f, 0.9375f));
+            texBack.push_back(glm::vec2(0.375f, 1.0f));
+            texBack.push_back(glm::vec2(0.3125f, 1.0f));
             break;
 
         case IRON: //TBD
@@ -204,10 +204,10 @@ std::vector<glm::vec2> Block::GetBlockTexCoords()
             texFront.push_back(glm::vec2(0.2f, 1.0f));
 
             // Back
-            texRight.push_back(glm::vec2(0.2f, 0.0f));
-            texRight.push_back(glm::vec2(0.3f, 0.0f));
-            texRight.push_back(glm::vec2(0.3f, 1.0f));
-            texRight.push_back(glm::vec2(0.2f, 1.0f));
+            texBack.push_back(glm::vec2(0.2f, 0.0f));
+            texBack.push_back(glm::vec2(0.3f, 0.0f));
+            texBack.push_back(glm::vec2(0.3f, 1.0f));
+            texBack.push_back(glm::vec2(0.2f, 1.0f));
             break;
 
         case SPONGE: //TBD
@@ -242,10 +242,10 @@ std::vector<glm::vec2> Block::GetBlockTexCoords()
             texFront.push_back(glm::vec2(0.2f, 1.0f));
 
             // Back
-            texRight.push_back(glm::vec2(0.2f, 0.0f));
-            texRight.push_back(glm::vec2(0.3f, 0.0f));
-            texRight.push_back(glm::vec2(0.3f, 1.0f));
-            texRight.push_back(glm::vec2(0.2f, 1.0f));
+            texBack.push_back(glm::vec2(0.2f, 0.0f));
+            texBack.push_back(glm::vec2(0.3f, 0.0f));
+            texBack.push_back(glm::vec2(0.3f, 1.0f));
+            texBack.push_back(glm::vec2(0.2f, 1.0f));
             break;
             
         default:
@@ -280,10 +280,10 @@ std::vector<glm::vec2> Block::GetBlockTexCoords()
             texFront.push_back(glm::vec2(0.2f, 1.0f));
 
             // Back
-            texRight.push_back(glm::vec2(0.2f, 0.0f));
-            texRight.push_back(glm::vec2(0.3f, 0.0f));
-            texRight.push_back(glm::vec2(0.3f, 1.0f));
-            texRight.push_back(glm::vec2(0.2f, 1.0f));
+            texBack.push_back(glm::vec2(0.2f, 0.0f));
+            texBack.push_back(glm::vec2(0.3f, 0.0f));
+            texBack.push_back(glm::vec2(0.3f, 1.0f));
+            texBack.push_back(glm::vec2(0.2f, 1.0f));
             break;
     }
 
