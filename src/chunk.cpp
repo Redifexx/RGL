@@ -74,7 +74,7 @@ void Chunk::GenerateMesh()
                             cubeTop[(8 * t) + 3] = texCoords_[t].x;
                             cubeTop[(8 * t) + 4] = texCoords_[t].y;
                         }
-                        texCoords_.erase(std::next(texCoords_.begin(), 0), std::next(texCoords_.begin(), 4)); // might break
+                    
 
 
                         vertices->insert(vertices->end(), std::begin(cubeTop), std::end(cubeTop));
@@ -86,6 +86,7 @@ void Chunk::GenerateMesh()
 
                         indexOffset += 4;
                     }
+                    texCoords_.erase(texCoords_.begin(), std::next(texCoords_.begin(), 4)); // might break
 
                     
                     //std::cout << "Checking Bottom" << std::endl;
@@ -103,7 +104,7 @@ void Chunk::GenerateMesh()
                             cubeBottom[(8 * t) + 3] = texCoords_[t].x;
                             cubeBottom[(8 * t) + 4] = texCoords_[t].y;
                         }
-                        texCoords_.erase(texCoords_.begin(), std::next(texCoords_.begin(), 4)); // might break
+                    
 
                         vertices->insert(vertices->end(), std::begin(cubeBottom), std::end(cubeBottom));
 
@@ -114,6 +115,7 @@ void Chunk::GenerateMesh()
 
                         indexOffset += 4;
                     }
+                    texCoords_.erase(texCoords_.begin(), std::next(texCoords_.begin(), 4)); // might break
 
                     
                     //std::cout << "Checking Left" << std::endl;
@@ -131,7 +133,7 @@ void Chunk::GenerateMesh()
                             cubeLeft[(8 * t) + 3] = texCoords_[t].x;
                             cubeLeft[(8 * t) + 4] = texCoords_[t].y;
                         }
-                        texCoords_.erase(texCoords_.begin(), std::next(texCoords_.begin(), 4)); // might break
+                        
 
                         vertices->insert(vertices->end(), std::begin(cubeLeft), std::end(cubeLeft));
 
@@ -142,7 +144,7 @@ void Chunk::GenerateMesh()
 
                         indexOffset += 4;
                     }
-                    
+                    texCoords_.erase(texCoords_.begin(), std::next(texCoords_.begin(), 4)); // might break
                     //std::cout << "Checking Right" << std::endl;
                     if (i == 15 || chunkArr[i+1][j][k]->type == AIR) //Right
                     {
@@ -159,7 +161,7 @@ void Chunk::GenerateMesh()
                             cubeRight[(8 * t) + 3] = texCoords_[t].x;
                             cubeRight[(8 * t) + 4] = texCoords_[t].y;
                         }
-                        texCoords_.erase(texCoords_.begin(), std::next(texCoords_.begin(), 4)); // might break
+                        
 
                         vertices->insert(vertices->end(), std::begin(cubeRight), std::end(cubeRight));
 
@@ -170,6 +172,7 @@ void Chunk::GenerateMesh()
 
                         indexOffset += 4;
                     }
+                    texCoords_.erase(texCoords_.begin(), std::next(texCoords_.begin(), 4)); // might break
 
                     //std::cout << "Checking Front" << std::endl;
                     if (k == 15 || chunkArr[i][j][k+1]->type == AIR) //Front
@@ -213,7 +216,7 @@ void Chunk::GenerateMesh()
                             cubeBack[(8 * t) + 3] = texCoords_[t].x;
                             cubeBack[(8 * t) + 4] = texCoords_[t].y;
                         }
-                        texCoords_.erase(texCoords_.begin(), std::next(texCoords_.begin(), 4)); // might break
+                        
 
                         vertices->insert(vertices->end(), std::begin(cubeBack), std::end(cubeBack));
 
@@ -224,6 +227,7 @@ void Chunk::GenerateMesh()
 
                         indexOffset += 4;
                     }
+                    texCoords_.erase(texCoords_.begin(), std::next(texCoords_.begin(), 4)); // might break
                     
                 }
             }
