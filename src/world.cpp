@@ -1,6 +1,6 @@
 #include "world.h"
 
-void World::GenerateWorld(std::string seed)
+void World::GenerateWorld()
 {
     std::cout << "Generating World!..." << std::endl;
     FastNoiseLite noise;
@@ -8,7 +8,7 @@ void World::GenerateWorld(std::string seed)
     //Sets Seed
     if (seed != "")
     {
-        noise.SetSeed(std::stoi(seed));
+        noise.SetSeed(std::stoi(this->seed));
     }
     else
     {

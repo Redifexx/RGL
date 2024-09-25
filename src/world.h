@@ -8,14 +8,16 @@
 
 class World
 {
-    void GenerateWorld(std::string seed);
+    //svoid GenerateWorld();
     int mapFloatToInt(float value);
 public:
+    void GenerateWorld();
     int worldMap[256][256];
     Chunk* worldChunks[16][16];
+    std::string seed;
     World(std::string seed = "")
     {
-        GenerateWorld(seed);
+        this->seed = seed;
     }
     //~World()
     //{

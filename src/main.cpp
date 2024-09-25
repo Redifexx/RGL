@@ -9,6 +9,7 @@
 #include <vector>
 #include <string>
 #include <chrono>
+#include <thread>
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
@@ -34,13 +35,15 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 // Texture helper function
 unsigned int loadTexture(char const* path);
 
+void TakeScreenshot();
+
 
 // GLOBAL VARIABLES
 
 // Screen Resolution
-const unsigned int SCR_WIDTH = 900;
-const unsigned int SCR_HEIGHT = 900;
-float fpsCap = 600000.0f;
+const unsigned int SCR_WIDTH = 1280;
+const unsigned int SCR_HEIGHT = 720;
+float fpsCap = 60.0f;
 
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
@@ -215,6 +218,9 @@ int main()
 
     //Minecraft Stuff
     World myWorld; //Generates World
+
+    //MultiThread Chunk Loading
+    std::thread thread1(myWorld.GenerateWorld());
     
 
 
@@ -444,6 +450,10 @@ void processInput(GLFWwindow *window)
     {
         glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
     }
+    if (glfwGetKey(window, GLFW_KEY_F2) == GLFW_PRESS)
+    {
+        TakeScreenshot();
+    }
 
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
     {
@@ -557,4 +567,56 @@ unsigned int loadTexture(char const* path)
     stbi_image_free(data); // cleans memory
 
     return textureID;
+}
+
+unsigned int HEADER_SIZE = 18;
+void TakeScreenshot()
+{
+    std::cout << "Screenshot!" << std::endl;
+    unsigned char* buffer;
+    char filename[50];
+    int w = SCR_WIDTH;
+    int h = SCR_HEIGHT;
+    int buf_size = HEADER_SIZE + (w * h * 3);
+    int i;
+    unsigned char temp;
+    FILE* out_file;
+
+    //Open File for Output
+    if (!(out_file = fopen("../screenshots/screenshot.tga", "wb")))
+    {
+        return;
+    }
+
+    //Allocate memory to read from the frame buffer
+    if (!(buffer = (unsigned char*) calloc(1, buf_size)))
+    {
+        return;
+    }
+
+    //Set Header Info
+    buffer[2] = 2;
+    buffer[12] = w & 255;
+    buffer[13] = w >> 8;
+    buffer[14] = h & 255;
+    buffer[15] = h >> 8;
+    buffer[16] = 24;
+
+    //Read the fram ebuffer
+    glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, buffer + HEADER_SIZE);
+
+    //RGB TO BGR (TGA)
+    for (i = HEADER_SIZE; i < buf_size; i += 3)
+    {
+        temp = buffer[i];
+        buffer[i] = buffer[i + 2];
+        buffer[i + 2] = temp;
+    }
+
+    //Write Header + Color Buf to File
+    fwrite(buffer, sizeof(unsigned char), buf_size, out_file);
+
+    //cleanup
+    fclose(out_file);
+    free(buffer);
 }
