@@ -1,4 +1,6 @@
 #define GLFW_INCLUDE_NONE
+#define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
+#define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -218,9 +220,9 @@ int main()
 
     //Minecraft Stuff
     World myWorld; //Generates World
-
+    myWorld.GenerateWorld();
     //MultiThread Chunk Loading
-    std::thread thread1(myWorld.GenerateWorld());
+    //std::thread thread1(myWorld.GenerateWorld());
     
 
 
@@ -553,11 +555,13 @@ unsigned int loadTexture(char const* path)
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D); //generates mipmaps :)
 
+        // Remake Texture Atlas with padding
         //Texture Settigns
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16);
     }
     else
     {

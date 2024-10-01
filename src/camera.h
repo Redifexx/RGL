@@ -139,6 +139,7 @@ public:
         if (Zoom > 120.0f)
             Zoom = 120.0f;
         */
+        
         Multiplier_ += (float)yoffset / 10.0f;
         if (Multiplier_ < 0.01f)
             Multiplier_ = 0.01f;
