@@ -1,7 +1,9 @@
 #ifndef WORLD_H
 #define WORLD_H
 
+#include <thread>
 #include <string>
+#include <future>
 #include <fastnoiselite/FastNoiseLite.h>
 #include <cstdlib>
 #include "chunk.h"
@@ -14,10 +16,12 @@ public:
     void GenerateWorld();
     int worldMap[256][256];
     Chunk* worldChunks[16][16];
+    Chunk* GenerateSingleChunk(int i_, int k_);
     std::string seed;
     World(std::string seed = "")
     {
         this->seed = seed;
+        GenerateWorld();
     }
     //~World()
     //{

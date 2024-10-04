@@ -220,7 +220,7 @@ int main()
 
     //Minecraft Stuff
     World myWorld; //Generates World
-    myWorld.GenerateWorld();
+    //myWorld.GenerateWorld();
     //MultiThread Chunk Loading
     //std::thread thread1(myWorld.GenerateWorld());
     
@@ -349,7 +349,7 @@ int main()
         {
             for (int k = 0; k < 15; k++)
             {
-                myWorld.worldChunks[i][k]->RenderChunk();
+                myWorld.worldChunks[i][k]->RenderChunk();  //fix threading here
             }
         }
 

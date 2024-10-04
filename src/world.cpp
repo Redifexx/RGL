@@ -34,23 +34,27 @@ void World::GenerateWorld()
         }
     }
 
+    std::vector<std::thread> chunkThreads;
+    std::future<Chunk*> storedChunks[16][16];
+
+
     std::cout << "Height Map Done!" << std::endl;
     std::cout << "Generating World Chunks! ---" << std::endl;
+    //Uses threads to generate chunks
     for (int i = 0; i < 16; i++)
     {
-        for (int k = 0; k < 16; k++)
+        for (int k = 0; k < 16; k++) //i, k, - returns chunk
         {
-            Chunk* curChunk = new Chunk(glm::ivec3((i - 8) * 16, 0, (k - 8) * 16));
+            storedChunks[i][k] = std::async(std::launch::async, &World::GenerateSingleChunk, this, i, k);
+        }
+    }
 
-            int** worldMapPtr = new int*[256];
-            for (int c = 0; c < 256; ++c)
-            {
-                worldMapPtr[c] = worldMap[c];
-            }
-            curChunk->GenerateChunk(worldMapPtr, 256, 256);
-            //std::cout << "i: " << i << " z: " << k << " Chunk X: " << curChunk->chunkPos.x << " Z: " << curChunk->chunkPos.z << std::endl;
-            worldChunks[i][k] = curChunk;
-            delete[] worldMapPtr;
+    //Gets Stored Chunk Values
+    for (int i = 0; i < 16; i++)
+    {
+        for (int k = 0; k < 16; k++) //i, k, - returns chunk
+        {
+            worldChunks[i][k] = storedChunks[i][k].get();
         }
     }
     std::cout << "World Done!" << std::endl;
@@ -66,4 +70,18 @@ int World::mapFloatToInt(float value)
     if (intValue > 16) intValue = 16;
 
     return intValue - 1;
+}
+
+//Helper for threading
+Chunk* World::GenerateSingleChunk(int i_, int k_)
+{
+    Chunk* curChunk = new Chunk(glm::ivec3((i_ - 8) * 16, 0, (k_ - 8) * 16));
+    int** worldMapPtr = new int*[256];
+    for (int c = 0; c < 256; ++c)
+    {
+        worldMapPtr[c] = worldMap[c];
+    }
+    curChunk->GenerateChunk(worldMapPtr, 256, 256);
+    delete[] worldMapPtr;
+    return curChunk;
 }
