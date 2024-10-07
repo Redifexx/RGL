@@ -72,7 +72,11 @@
         "xtree": "cpp",
         "set": "cpp",
         "unordered_set": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "condition_variable": "cpp",
+        "coroutine": "cpp",
+        "resumable": "cpp",
+        "future": "cpp"
     },
     "cmake.configureOnOpen": false
 }

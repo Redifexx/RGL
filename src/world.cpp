@@ -34,27 +34,14 @@ void World::GenerateWorld()
         }
     }
 
-    std::vector<std::thread> chunkThreads;
-    std::future<Chunk*> storedChunks[16][16];
-
-
     std::cout << "Height Map Done!" << std::endl;
-    std::cout << "Generating World Chunks! ---" << std::endl;
+    std::cout << "Generating World Chunks Async! ---" << std::endl;
     //Uses threads to generate chunks
     for (int i = 0; i < 16; i++)
     {
         for (int k = 0; k < 16; k++) //i, k, - returns chunk
         {
             storedChunks[i][k] = std::async(std::launch::async, &World::GenerateSingleChunk, this, i, k);
-        }
-    }
-
-    //Gets Stored Chunk Values
-    for (int i = 0; i < 16; i++)
-    {
-        for (int k = 0; k < 16; k++) //i, k, - returns chunk
-        {
-            worldChunks[i][k] = storedChunks[i][k].get();
         }
     }
     std::cout << "World Done!" << std::endl;
@@ -83,5 +70,37 @@ Chunk* World::GenerateSingleChunk(int i_, int k_)
     }
     curChunk->GenerateChunk(worldMapPtr, 256, 256);
     delete[] worldMapPtr;
+    //std::cout << "Chunk: " << i_ << " " << k_ << " - Generated!" << std::endl;
     return curChunk;
+}
+
+void World::BackgroundChunkLoader()
+{
+    std::cout << "Setting Stored Chunks! ---" << std::endl;
+    bool allValid = false;
+    while(!allValid)
+    {
+        allValid = true;
+        //very inefficient, could be fixed later
+        for (int i = 0; i < 16; i++)
+        {
+            for (int k = 0; k < 16; k++) //i, k, - returns chunk
+            {
+                if (storedChunks[i][k].valid())
+                {
+                    worldChunks[i][k] = storedChunks[i][k].get();
+                }
+                else
+                {
+                    allValid = false;
+                }
+            }
+        }
+    }
+}
+
+void World::SetupChunkLoader()
+{
+    std::thread chunks(BackgroundChunkLoader);
+    chunks.detach();
 }

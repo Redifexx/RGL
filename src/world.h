@@ -14,8 +14,11 @@ class World
     int mapFloatToInt(float value);
 public:
     void GenerateWorld();
+    void BackgroundChunkLoader();
+    void SetupChunkLoader();
     int worldMap[256][256];
     Chunk* worldChunks[16][16];
+    std::future<Chunk*> storedChunks[16][16];
     Chunk* GenerateSingleChunk(int i_, int k_);
     std::string seed;
     World(std::string seed = "")
