@@ -12,7 +12,7 @@ public:
     glm::ivec3 chunkPos;
     std::vector<float>* vertices;
     std::vector<unsigned int>* indices;
-    bool hasRendered = false;
+    bool hasGenerated = false;
 
     unsigned int cVAO, cVBO, cEBO;
     Chunk(glm::ivec3 chunkPos_ = glm::ivec3(0, 0, 0));

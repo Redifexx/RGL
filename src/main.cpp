@@ -219,8 +219,10 @@ int main()
     std::string zText = "";
 
     //Minecraft Stuff
+    std::cout << "CREATING WORLD OBJECT" << endl;
     World myWorld; //Generates World
     myWorld.SetupChunkLoader();
+    std::cout << "FINISHED WORLD OBJECT" << endl;
     //myWorld.GenerateWorld();
     //MultiThread Chunk Loading
     //std::thread thread1(myWorld.GenerateWorld());
@@ -350,7 +352,8 @@ int main()
         {
             for (int k = 0; k < 15; k++)
             {
-                myWorld.worldChunks[i][k]->RenderChunk();  //fix threading here
+                myWorld.worldChunks[i][k]->RenderChunk();
+                 //fix threading here
                 //Create an array of finished chunks and only render that array until
                 //all of the world chunks are updated, then iterate with 2d array
             }

@@ -3,6 +3,7 @@
 Chunk::Chunk(glm::ivec3 chunkPos_)
 {
     this->chunkPos = chunkPos_;
+    this->hasGenerated = false;
 }
 
 void Chunk::GenerateChunk(int** worldMap, int width, int height)
@@ -45,8 +46,9 @@ void Chunk::GenerateChunk(int** worldMap, int width, int height)
 
 void Chunk::GenerateMesh()
 {
-    vertices = new std::vector<float>();
-    indices = new std::vector<unsigned int>();
+    this->vertices = new std::vector<float>();
+    this->indices = new std::vector<unsigned int>();
+    std::cout << "VERTS AND INDS MADE" << std::endl;
     //std::cout << "Generating Chunk Mesh!" << std::endl;
     unsigned int indexOffset = 0;
     std::vector<glm::vec2> texCoords_;
@@ -283,7 +285,17 @@ void Chunk::RenderChunk()
     //    }
     //    hasRendered = true;
     //}
-    glBindVertexArray(this->cVAO);
-    glDrawElements(GL_TRIANGLES, indices->size(), GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
+    std::cout << "Render Start!" << std::endl;
+    if (this->hasGenerated)
+    {
+        std::cout << "BIND" << std::endl;
+        glBindVertexArray(this->cVAO);
+        std::cout << "DRAW | Indices size -> " << indices->size() << std::endl;
+        glDrawElements(GL_TRIANGLES, indices->size(), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+    }
+    else
+    {
+        std::cout << "NOT YET GENERATED!" << std::endl;
+    }
 }

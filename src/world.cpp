@@ -89,6 +89,7 @@ void World::BackgroundChunkLoader()
                 if (storedChunks[i][k].valid())
                 {
                     worldChunks[i][k] = storedChunks[i][k].get();
+                    worldChunks[i][k]->hasGenerated = true;
                 }
                 else
                 {
@@ -101,6 +102,6 @@ void World::BackgroundChunkLoader()
 
 void World::SetupChunkLoader()
 {
-    std::thread chunks(BackgroundChunkLoader);
+    std::thread chunks(BackgroundChunkLoader, this);
     chunks.detach();
 }
