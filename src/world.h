@@ -19,8 +19,10 @@ public:
     int worldMap[256][256];
     int renderDistance = 16;
     Chunk* worldChunks[16][16];
+    std::mutex chunkMutex; // Mutex for synchronizing access to worldChunks
+    std::vector<Chunk*> renderableChunks;
     std::future<Chunk*> storedChunks[16][16];
-    Chunk* GenerateSingleChunk(int i_, int k_);
+    Chunk* GenerateSingleChunk(Chunk* chunk);
     std::string seed;
     World(std::string seed = "")
     {

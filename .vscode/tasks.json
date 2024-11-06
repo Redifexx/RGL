@@ -5,6 +5,7 @@
             "label": "C/C++: g++.exe build active file",
             "command": "C:\\msys64\\ucrt64\\bin\\g++.exe",
             "args": [
+                "-g",
                 "-I${workspaceFolder}\\include",
                 "-L${workspaceFolder}\\lib",
                 "${workspaceFolder}\\src\\*.cpp",

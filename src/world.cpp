@@ -41,7 +41,8 @@ void World::GenerateWorld()
     {
         for (int k = 0; k < 16; k++) //i, k, - returns chunk
         {
-            storedChunks[i][k] = std::async(std::launch::async, &World::GenerateSingleChunk, this, i, k);
+            Chunk* curChunk = new Chunk(glm::ivec3((i - 8) * 16, 0, (k - 8) * 16));
+            storedChunks[i][k] = std::async(std::launch::async, &World::GenerateSingleChunk, this, curChunk);
         }
     }
     std::cout << "World Done!" << std::endl;
@@ -60,42 +61,33 @@ int World::mapFloatToInt(float value)
 }
 
 //Helper for threading
-Chunk* World::GenerateSingleChunk(int i_, int k_)
+Chunk* World::GenerateSingleChunk(Chunk* chunk)
 {
-    Chunk* curChunk = new Chunk(glm::ivec3((i_ - 8) * 16, 0, (k_ - 8) * 16));
     int** worldMapPtr = new int*[256];
     for (int c = 0; c < 256; ++c)
     {
         worldMapPtr[c] = worldMap[c];
     }
-    curChunk->GenerateChunk(worldMapPtr, 256, 256);
+    chunk->GenerateChunk(worldMapPtr, 256, 256);
     delete[] worldMapPtr;
     //std::cout << "Chunk: " << i_ << " " << k_ << " - Generated!" << std::endl;
-    return curChunk;
+    return chunk;
 }
 
 void World::BackgroundChunkLoader()
 {
     std::cout << "Setting Stored Chunks! ---" << std::endl;
-    bool allValid = false;
-    while(!allValid)
+    for (int i = 0; i < 16; i++)
     {
-        allValid = true;
-        //very inefficient, could be fixed later
-        for (int i = 0; i < 16; i++)
+        for (int k = 0; k < 16; k++) //i, k, - returns chunk
         {
-            for (int k = 0; k < 16; k++) //i, k, - returns chunk
-            {
-                if (storedChunks[i][k].valid())
-                {
-                    worldChunks[i][k] = storedChunks[i][k].get();
-                    worldChunks[i][k]->hasGenerated = true;
-                }
-                else
-                {
-                    allValid = false;
-                }
-            }
+            storedChunks[i][k].wait();
+
+            std::lock_guard<std::mutex> lock(chunkMutex);
+            worldChunks[i][k] = storedChunks[i][k].get();
+            worldChunks[i][k]->hasGenerated = true;
+
+            renderableChunks.push_back(worldChunks[i][k]);
         }
     }
 }
@@ -103,5 +95,5 @@ void World::BackgroundChunkLoader()
 void World::SetupChunkLoader()
 {
     std::thread chunks(BackgroundChunkLoader, this);
-    chunks.detach();
+    chunks.join();
 }

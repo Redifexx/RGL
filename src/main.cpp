@@ -348,66 +348,17 @@ int main()
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, specularMap);
 
-        for (int i = 0; i < 15; i++)
+
+        std::lock_guard<std::mutex> lock(myWorld.chunkMutex);
+        for (Chunk* chunk : myWorld.renderableChunks)
         {
-            for (int k = 0; k < 15; k++)
+            if (chunk && chunk->hasGenerated) // Check if the chunk exists and is generated
             {
-                myWorld.worldChunks[i][k]->RenderChunk();
-                 //fix threading here
-                //Create an array of finished chunks and only render that array until
-                //all of the world chunks are updated, then iterate with 2d array
+                //std::cout << "RENDERING" << std::endl;
+                chunk->RenderChunk();
             }
         }
-
-        // Cube Pos
-        //model = glm::mat4(1.0f);
-        //model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-        //model = glm::scale(model, glm::vec3(1.0f));
-        ////glBindVertexArray(lightVAO);
-//
-        //glm::vec3 curPos(0.0f, 0.0f, 0.0f);
-        //model = glm::mat4(1.0f);
-        //model = glm::translate(model, curPos);
-        //glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
-        //glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
-        //glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-        //glDrawArrays(GL_TRIANGLES, 0, 36);
-        //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        //glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-        //for (int i = 0; i < 16; i++)
-        //{
-        //    for (int j = 0; j < 16; j++)
-        //    {
-        //        for (int k = 0; k < 16; k++)
-        //        {
-        //            glm::vec3 curPos((float)i, -(float)k, (float)j);
-        //            model = glm::mat4(1.0f);
-        //            model = glm::translate(model, curPos);
-        //            glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
-        //            glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
-        //            glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-        //            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        //            glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-        //        }
-        //    }
-        //}
-        //Setting Up Texture
-
-
-
-        //lightCubeShader.use();
-        //model = glm::mat4(1.0f);
-        //model = glm::translate(model, lightPos);
-        //model = glm::scale(model, glm::vec3(0.2f));
-        //glm::vec3 lightColor(1.0f, 0.0f, 1.0f);
-//
-        //glUniform3fv(glGetUniformLocation(lightCubeShader.ID, "lightColor"), 1, glm::value_ptr(lightColor));
-        //glUniformMatrix4fv(glGetUniformLocation(lightCubeShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
-        //glUniformMatrix4fv(glGetUniformLocation(lightCubeShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
-        //glUniformMatrix4fv(glGetUniformLocation(lightCubeShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-//
-        //glBindVertexArray(lightCubeVAO);
-        //glDrawArrays(GL_TRIANGLES, 0, 36); //for drawing cubes
+        
 
         while (glfwGetTime() < lasttime + 1.0/fpsCap) {
             //FPS
