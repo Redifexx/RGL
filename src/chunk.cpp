@@ -43,7 +43,7 @@ void Chunk::GenerateChunk(int** worldMap, int width, int height)
     GenerateMesh();
     //std::cout << "Done Generating Chunk Mesh!" << std::endl;
     //std::cout << "Setting Up Chunk Buffers!" << std::endl;
-    SetupChunkBuffers();
+    //SetupChunkBuffers();
 };
 
 void Chunk::GenerateMesh()
@@ -272,22 +272,13 @@ void Chunk::SetupChunkBuffers()
 
 void Chunk::RenderChunk()
 {
-    //if (!hasRendered)
-    //{
-    //    for (int i = 0; i < vertices->size(); i += 8)
-    //    {
-    //        std::cout << "V: ";
-    //        for (int j = 0; j < 3; j++)
-    //        {
-    //            std::cout << vertices->at(i + j) << " ";
-    //        }
-    //        std::cout << std::endl;
-    //    }
-    //    hasRendered = true;
-    //}
-    //std::cout << "Render Start!" << std::endl;
     if (this->hasGenerated)
     {
+        if (!hasBuffersReady)
+        {
+            SetupChunkBuffers();
+            hasBuffersReady = true;
+        }
         //std::cout << "BIND" << std::endl;
         glBindVertexArray(this->cVAO);
         //std::cout << "DRAW | Indices size -> " << indices->size() << std::endl;

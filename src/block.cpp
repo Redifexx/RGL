@@ -22,40 +22,37 @@ std::vector<glm::vec2> Block::GetBlockTexCoords()
     {
         case STONE:
             //Top
+
             texTop.push_back(glm::vec2(0.0f, 0.9375f));
             texTop.push_back(glm::vec2(0.0625f, 0.9375f));
             texTop.push_back(glm::vec2(0.0625f, 1.0f));
             texTop.push_back(glm::vec2(0.0f, 1.0f));
 
-            // Bottom
             texBottom.push_back(glm::vec2(0.0f, 0.9375f));
             texBottom.push_back(glm::vec2(0.0625f, 0.9375f));
             texBottom.push_back(glm::vec2(0.0625f, 1.0f));
             texBottom.push_back(glm::vec2(0.0f, 1.0f));
 
-            // Left
             texLeft.push_back(glm::vec2(0.0f, 0.9375f));
             texLeft.push_back(glm::vec2(0.0625f, 0.9375f));
             texLeft.push_back(glm::vec2(0.0625f, 1.0f));
             texLeft.push_back(glm::vec2(0.0f, 1.0f));
 
-            // Right
             texRight.push_back(glm::vec2(0.0f, 0.9375f));
             texRight.push_back(glm::vec2(0.0625f, 0.9375f));
             texRight.push_back(glm::vec2(0.0625f, 1.0f));
             texRight.push_back(glm::vec2(0.0f, 1.0f));
 
-            // Front
             texFront.push_back(glm::vec2(0.0f, 0.9375f));
             texFront.push_back(glm::vec2(0.0625f, 0.9375f));
             texFront.push_back(glm::vec2(0.0625f, 1.0f));
             texFront.push_back(glm::vec2(0.0f, 1.0f));
 
-            // Back
             texBack.push_back(glm::vec2(0.0f, 0.9375f));
             texBack.push_back(glm::vec2(0.0625f, 0.9375f));
             texBack.push_back(glm::vec2(0.0625f, 1.0f));
             texBack.push_back(glm::vec2(0.0f, 1.0f));
+
             break;
 
         case GOLD:
@@ -324,4 +321,11 @@ std::vector<glm::vec2> Block::GetBlockTexCoords()
     }
 
     return texCoords;
+}
+
+glm::vec2 Block::getTexelCoords(float x, float y, int texWidth, int texHeight)
+{
+    float u = (x + 0.5f) / texWidth;
+    float v = (y + 0.5f) / texHeight;
+    return glm::vec2(u, v);
 }

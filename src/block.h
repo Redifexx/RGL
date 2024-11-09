@@ -26,6 +26,9 @@ public:
     BLOCK_TYPE type;
     Block(glm::ivec3 pos_ = glm::ivec3(0), BLOCK_TYPE type_ = AIR);
     std::vector<glm::vec2> GetBlockTexCoords();
+
+    //From Stack Exchange
+    glm::vec2 getTexelCoords(float x, float y, int texWidth, int texHeight);
 };
 
 #endif

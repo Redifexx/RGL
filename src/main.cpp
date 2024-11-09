@@ -45,7 +45,7 @@ void TakeScreenshot();
 // Screen Resolution
 const unsigned int SCR_WIDTH = 1280;
 const unsigned int SCR_HEIGHT = 720;
-float fpsCap = 60.0f;
+float fpsCap = 120.0f;
 
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
@@ -223,13 +223,10 @@ int main()
     World myWorld; //Generates World
     myWorld.SetupChunkLoader();
     std::cout << "FINISHED WORLD OBJECT" << endl;
-    //myWorld.GenerateWorld();
-    //MultiThread Chunk Loading
-    //std::thread thread1(myWorld.GenerateWorld());
     
 
 
-    //MAIN RENDER LOOP
+    //MAIN RENDER LOOP------------------------------------------------------------------------------------------------------------------------------------------------------------
     std::cout << "RENDER LOOP!" << std::endl;
     while(!glfwWindowShouldClose(window))
     {
@@ -349,12 +346,26 @@ int main()
         glBindTexture(GL_TEXTURE_2D, specularMap);
 
 
-        std::lock_guard<std::mutex> lock(myWorld.chunkMutex);
-        for (Chunk* chunk : myWorld.renderableChunks)
+        //std::lock_guard<std::mutex> lock(myWorld.chunkMutex);
+        //for (Chunk* chunk : myWorld.renderableChunks)
+        //{
+        //    if (chunk && chunk->hasGenerated) // Check if the chunk exists and is generated
+        //    {
+        //        //std::cout << "RENDERING" << std::endl;
+        //        chunk->RenderChunk();
+        //    }
+        //}
+
+        std::vector<Chunk*> chunksToRender;
         {
-            if (chunk && chunk->hasGenerated) // Check if the chunk exists and is generated
+            std::lock_guard<std::mutex> lock(myWorld.chunkMutex);
+            chunksToRender = myWorld.renderableChunks; // Copy renderable chunks list
+        }
+
+        for (Chunk* chunk : chunksToRender)
+        {
+            if (chunk && chunk->hasGenerated) 
             {
-                //std::cout << "RENDERING" << std::endl;
                 chunk->RenderChunk();
             }
         }

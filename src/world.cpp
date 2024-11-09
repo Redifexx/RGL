@@ -86,14 +86,17 @@ void World::BackgroundChunkLoader()
             std::lock_guard<std::mutex> lock(chunkMutex);
             worldChunks[i][k] = storedChunks[i][k].get();
             worldChunks[i][k]->hasGenerated = true;
-
             renderableChunks.push_back(worldChunks[i][k]);
+
+            // Optional: Short delay to make generation more visible
+            std::this_thread::sleep_for(std::chrono::nanoseconds(100));
         }
     }
+    std::cout << "CHUNKS LOADED" << std::endl;
 }
 
 void World::SetupChunkLoader()
 {
     std::thread chunks(BackgroundChunkLoader, this);
-    chunks.join();
+    chunks.detach();
 }
