@@ -16,6 +16,7 @@
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
 #include "camera.h"
+#define PRIMITIVES
 #include "primitives.h"
 #include "model.h"
 #define STB_IMAGE_IMPLEMENTATION
@@ -36,6 +37,8 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 // Texture helper function
 unsigned int loadTexture(char const* path);
+
+unsigned int loadCubemap(std::vector<std::string> cubemapPath);
 
 void TakeScreenshot();
 
@@ -91,7 +94,7 @@ int main()
     // glfw window creation
     // --------------------
     glfwWindowHint(GLFW_SAMPLES, 0);
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "RGL (Dev Build 0.0.2)", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "RedifexxGL", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -131,56 +134,38 @@ int main()
     // ------------------------------------------------------------------
 
     Shader phongShader("../shaders/source.vs", "../shaders/source.fs");
+    Shader skyboxShader("../shaders/skybox.vs", "../shaders/skybox.fs");
     Shader modelShader("../shaders/modelLoad.vs", "../shaders/modelLoad.fs");
     Shader stencilShader("../shaders/objOutline.vs", "../shaders/objOutline.fs");
     Shader lightCubeShader("../shaders/lightCube.vs", "../shaders/lightCube.fs");
 
+    //Cubemap Path Setup
+    //CubeMap Setup
+    std::vector<std::string> cubemapPaths;
+    cubemapPaths.push_back("../textures/cubemap/clouds1_east.bmp");
+    cubemapPaths.push_back("../textures/cubemap/clouds1_west.bmp");
+    cubemapPaths.push_back("../textures/cubemap/clouds1_up.bmp");
+    cubemapPaths.push_back("../textures/cubemap/clouds1_down.bmp");
+    cubemapPaths.push_back("../textures/cubemap/clouds1_south.bmp");
+    cubemapPaths.push_back("../textures/cubemap/clouds1_north.bmp");
 
-    //Model backpack("../models/backpack/backpack.obj");
-    //Model backpack("../models/gman-toilet/source/GmanToilet.fbx");
+    unsigned int cubemapTexture = loadCubemap(cubemapPaths);
+
+    unsigned int skyboxVAO, skyboxVBO;
+    glGenVertexArrays(1, &skyboxVAO);
+    glGenBuffers(1, &skyboxVBO);
+
+    glBindVertexArray(skyboxVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    //glBindVertexArray(0);
+    
 
 
-    ////EBO -- disabled for cube
-    //unsigned int EBO;
-    //glGenBuffers(1, &EBO);
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cubeIndices), cubeIndices, GL_STATIC_DRAW);
-    //// position attribute
-    //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    //glEnableVertexAttribArray(0);
-    //// color attribute
-    //glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3* sizeof(float)));
-    //glEnableVertexAttribArray(1);
-    // texture attribute
-    //glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(6 * sizeof(float)));
-    //glEnableVertexAttribArray(2);
-    //glBindVertexArray(VAO);
 
-
-    ////VBO
-    //unsigned int VBO;
-    //glGenBuffers(1, &VBO);
-    //glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    //glBufferData(GL_ARRAY_BUFFER, sizeof(cube), cube, GL_STATIC_DRAW);
-//
-    ////Light VAO
-    //unsigned int lightVAO;
-    //glGenVertexArrays(1, &lightVAO);
-    //glBindVertexArray(lightVAO);
-    //glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    //glEnableVertexAttribArray(0);
-    //glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3* sizeof(float)));
-    //glEnableVertexAttribArray(1);
-    //glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5* sizeof(float)));
-    //glEnableVertexAttribArray(2);
-//
-    //unsigned int lightCubeVAO;
-    //glGenVertexArrays(1, &lightCubeVAO);
-    //glBindVertexArray(lightCubeVAO);
-    //glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    //glEnableVertexAttribArray(0);
+    
 
     //GL Settings
     glEnable(GL_DEPTH_TEST);
@@ -189,10 +174,6 @@ int main()
     glEnable(GL_CULL_FACE); 
     glFrontFace(GL_CCW);
     glCullFace(GL_BACK);
-
-    //Stencil
-    //glEnable(GL_STENCIL_TEST);
-    //glStencilFunc(GL_ALWAYS, 1, 0xFF);
 
     glfwSwapInterval(0); // Disables VSync
 
@@ -217,6 +198,7 @@ int main()
     std::string xText = ""; 
     std::string yText = ""; 
     std::string zText = "";
+    std::string versionText = "Dev 0.3";
 
     //Minecraft Stuff
     std::cout << "CREATING WORLD OBJECT" << endl;
@@ -278,11 +260,14 @@ int main()
         ImGui::Text(yText.c_str());
         ImGui::SetCursorPos(ImVec2(20, 80));
         ImGui::Text(zText.c_str());
+        ImGui::SetCursorPos(ImVec2(20, 100));
+        ImGui::Text(versionText.c_str());
 
 
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+
 
 
         //Render Stuff
@@ -356,20 +341,34 @@ int main()
         //    }
         //}
 
-        std::vector<Chunk*> chunksToRender;
-        {
-            std::lock_guard<std::mutex> lock(myWorld.chunkMutex);
-            chunksToRender = myWorld.renderableChunks; // Copy renderable chunks list
-        }
-
-        for (Chunk* chunk : chunksToRender)
-        {
-            if (chunk && chunk->hasGenerated) 
-            {
-                chunk->RenderChunk();
-            }
-        }
+        //std::vector<Chunk*> chunksToRender;
+        //{
+        //    std::lock_guard<std::mutex> lock(myWorld.chunkMutex);
+        //    chunksToRender = myWorld.renderableChunks; // Copy renderable chunks list
+        //}
+//
+        //for (Chunk* chunk : chunksToRender)
+        //{
+        //    if (chunk && chunk->hasGenerated) 
+        //    {
+        //        chunk->RenderChunk();
+        //    }
+        //}
         
+
+        //Skybox--------------------------------
+        glDepthFunc(GL_LEQUAL);
+        skyboxShader.use();
+
+        view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
+        //projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.001f, 1000.0f);
+
+        glBindVertexArray(skyboxVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glBindVertexArray(0);
+        glDepthFunc(GL_LESS);
 
         while (glfwGetTime() < lasttime + 1.0/fpsCap) {
             //FPS
@@ -537,6 +536,45 @@ unsigned int loadTexture(char const* path)
     }
 
     stbi_image_free(data); // cleans memory
+
+    return textureID;
+}
+
+unsigned int loadCubemap(std::vector<std::string> cubemapPath)
+{
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+    int width, height, nrChannels;
+    unsigned char* data;
+    for (unsigned int i = 0; i < cubemapPath.size(); i++)
+    {
+        data = stbi_load(cubemapPath[i].c_str(), &width, &height, &nrChannels, 0);
+        
+        if (data)
+        {
+            glTexImage2D(
+                GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data 
+            );
+            std::cout << "Cubemap tex SUCCESSFUL at path: " << cubemapPath[i] << std::endl;
+            stbi_image_free(data); // cleans memory
+        }
+        else
+        {
+            std::cout << "Cubemap tex failed to load at path: " << cubemapPath[i] << std::endl;
+            stbi_image_free(data); // cleans memory
+        }
+        
+    }
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    
 
     return textureID;
 }
