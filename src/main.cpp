@@ -54,7 +54,7 @@ float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 
 // mouse cursor initialization + CAM
-Camera camera(glm::vec3(0.0f, 18.0f, 0.0f));
+Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
 
 //Cursor Lock
 float lastX = SCR_WIDTH / 2.0f;
@@ -146,8 +146,8 @@ int main()
     cubemapPaths.push_back("../textures/cubemap/clouds1_west.bmp");
     cubemapPaths.push_back("../textures/cubemap/clouds1_up.bmp");
     cubemapPaths.push_back("../textures/cubemap/clouds1_down.bmp");
-    cubemapPaths.push_back("../textures/cubemap/clouds1_south.bmp");
     cubemapPaths.push_back("../textures/cubemap/clouds1_north.bmp");
+    cubemapPaths.push_back("../textures/cubemap/clouds1_south.bmp");
 
     unsigned int cubemapTexture = loadCubemap(cubemapPaths);
 
@@ -178,12 +178,12 @@ int main()
     glfwSwapInterval(0); // Disables VSync
 
     //Texture - Depricated
-    unsigned int diffuseMap = loadTexture("../textures/mc_ss.png");
-    unsigned int specularMap = loadTexture("../textures/mc_ss.png");
+    //unsigned int diffuseMap = loadTexture("../textures/mc_ss.png");
+    //unsigned int specularMap = loadTexture("../textures/mc_ss.png");
     
-    phongShader.use();
-    glUniform1i(glGetUniformLocation(phongShader.ID, "material.diffuse"), 0);
-    glUniform1i(glGetUniformLocation(phongShader.ID, "material.specularMap"), 1);
+    //phongShader.use();
+    //glUniform1i(glGetUniformLocation(phongShader.ID, "material.diffuse"), 0);
+    //glUniform1i(glGetUniformLocation(phongShader.ID, "material.specularMap"), 1);
     //glUniform1i(glGetUniformLocation(lightingShader.ID, "material.specularMap"), 1);
     //glUniform1i(glGetUniformLocation(lightingShader.ID, "material.emissionMap"), 2);
     
@@ -306,6 +306,7 @@ int main()
         //glEnable(GL_DEPTH_TEST);
                 
         // Material Settings
+        /*
         float materialSpecFactor = 0.0f;
         float materialEmisFactor = 0.0f;
         float materialShininess = 32.0f;
@@ -329,45 +330,49 @@ int main()
         glBindTexture(GL_TEXTURE_2D, diffuseMap);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, specularMap);
+        */
 
+        std::lock_guard<std::mutex> lock(myWorld.chunkMutex);
+        for (Chunk* chunk : myWorld.renderableChunks)
+        {
+            if (chunk && chunk->hasGenerated) // Check if the chunk exists and is generated
+            {
+                //std::cout << "RENDERING" << std::endl;
+                chunk->RenderChunk();
+            }
+        }
 
-        //std::lock_guard<std::mutex> lock(myWorld.chunkMutex);
-        //for (Chunk* chunk : myWorld.renderableChunks)
-        //{
-        //    if (chunk && chunk->hasGenerated) // Check if the chunk exists and is generated
-        //    {
-        //        //std::cout << "RENDERING" << std::endl;
-        //        chunk->RenderChunk();
-        //    }
-        //}
+        std::vector<Chunk*> chunksToRender;
+        {
+            std::lock_guard<std::mutex> lock(myWorld.chunkMutex);
+            chunksToRender = myWorld.renderableChunks; // Copy renderable chunks list
+        }
 
-        //std::vector<Chunk*> chunksToRender;
-        //{
-        //    std::lock_guard<std::mutex> lock(myWorld.chunkMutex);
-        //    chunksToRender = myWorld.renderableChunks; // Copy renderable chunks list
-        //}
-//
-        //for (Chunk* chunk : chunksToRender)
-        //{
-        //    if (chunk && chunk->hasGenerated) 
-        //    {
-        //        chunk->RenderChunk();
-        //    }
-        //}
+        for (Chunk* chunk : chunksToRender)
+        {
+            if (chunk && chunk->hasGenerated) 
+            {
+                chunk->RenderChunk();
+            }
+        }
         
 
         //Skybox--------------------------------
         glDepthFunc(GL_LEQUAL);
+        //glDepthMask(GL_FALSE);
         skyboxShader.use();
 
         view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
         //projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.001f, 1000.0f);
-
+        glUniformMatrix4fv(glGetUniformLocation(skyboxShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(skyboxShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
         glBindVertexArray(skyboxVAO);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+        glUniform1i(glGetUniformLocation(skyboxShader.ID, "skybox"), 0);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
+        //glDepthMask(GL_TRUE);
         glDepthFunc(GL_LESS);
 
         while (glfwGetTime() < lasttime + 1.0/fpsCap) {
@@ -548,6 +553,7 @@ unsigned int loadCubemap(std::vector<std::string> cubemapPath)
 
     int width, height, nrChannels;
     unsigned char* data;
+    stbi_set_flip_vertically_on_load(false);
     for (unsigned int i = 0; i < cubemapPath.size(); i++)
     {
         data = stbi_load(cubemapPath[i].c_str(), &width, &height, &nrChannels, 0);
@@ -568,6 +574,7 @@ unsigned int loadCubemap(std::vector<std::string> cubemapPath)
         }
         
     }
+    stbi_set_flip_vertically_on_load(true);
 
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
