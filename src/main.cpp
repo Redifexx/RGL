@@ -178,12 +178,12 @@ int main()
     glfwSwapInterval(0); // Disables VSync
 
     //Texture - Depricated
-    //unsigned int diffuseMap = loadTexture("../textures/mc_ss.png");
-    //unsigned int specularMap = loadTexture("../textures/mc_ss.png");
+    unsigned int diffuseMap = loadTexture("../textures/mc_ss.png");
+    unsigned int specularMap = loadTexture("../textures/mc_ss.png");
     
-    //phongShader.use();
-    //glUniform1i(glGetUniformLocation(phongShader.ID, "material.diffuse"), 0);
-    //glUniform1i(glGetUniformLocation(phongShader.ID, "material.specularMap"), 1);
+    phongShader.use();
+    glUniform1i(glGetUniformLocation(phongShader.ID, "material.diffuse"), 0);
+    glUniform1i(glGetUniformLocation(phongShader.ID, "material.specularMap"), 1);
     //glUniform1i(glGetUniformLocation(lightingShader.ID, "material.specularMap"), 1);
     //glUniform1i(glGetUniformLocation(lightingShader.ID, "material.emissionMap"), 2);
     
@@ -306,7 +306,7 @@ int main()
         //glEnable(GL_DEPTH_TEST);
                 
         // Material Settings
-        /*
+        
         float materialSpecFactor = 0.0f;
         float materialEmisFactor = 0.0f;
         float materialShininess = 32.0f;
@@ -330,18 +330,7 @@ int main()
         glBindTexture(GL_TEXTURE_2D, diffuseMap);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, specularMap);
-        */
-
-        std::lock_guard<std::mutex> lock(myWorld.chunkMutex);
-        for (Chunk* chunk : myWorld.renderableChunks)
-        {
-            if (chunk && chunk->hasGenerated) // Check if the chunk exists and is generated
-            {
-                //std::cout << "RENDERING" << std::endl;
-                chunk->RenderChunk();
-            }
-        }
-
+        
         std::vector<Chunk*> chunksToRender;
         {
             std::lock_guard<std::mutex> lock(myWorld.chunkMutex);
@@ -395,8 +384,8 @@ int main()
     
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
-    //glDeleteVertexArrays(1, &lightVAO);
-    //glDeleteBuffers(1, &VBO);
+    glDeleteVertexArrays(1, &skyboxVAO);
+    glDeleteBuffers(1, &skyboxVBO);
 
     glfwTerminate();
     return 0;
