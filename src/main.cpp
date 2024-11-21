@@ -22,6 +22,11 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 #include "world.h"
+#include "FrameBuffer.h"
+
+
+// Resizeable ImGui Window
+//void glfwSetWindowSizeCallback(GLFWwindow* window, int width, int height);
 
 // Resizeable Window
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -45,10 +50,13 @@ void TakeScreenshot();
 
 // GLOBAL VARIABLES
 
+float* m_width = new float;
+float* m_height = new float;
+
 // Screen Resolution
 const unsigned int SCR_WIDTH = 1280;
 const unsigned int SCR_HEIGHT = 720;
-float fpsCap = 120.0f;
+float fpsCap = 60.0f;
 
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
@@ -72,9 +80,8 @@ void calculateDeltaTime()
 }
 
 
-//Light Positions
-//glm::vec3 lightPos(8.0f, 1.0f, 8.0f);
-//glm::vec3 cubePos(0.0f, 0.0f, 0.0f);
+//FrameBuffer etup
+FrameBuffer* sceneBuffer;
 
 //FUTURE OPTIMIZATION: DO MODEL, VIEW,  PROJECTION ON CPU
 
@@ -113,6 +120,9 @@ int main()
     }
 
     stbi_set_flip_vertically_on_load(true);
+
+    //Framebuffer
+    sceneBuffer = new FrameBuffer(SCR_WIDTH, SCR_HEIGHT);
 
     // IMGUI SETUP
     // Setup Dear ImGui context
@@ -202,8 +212,8 @@ int main()
 
     //Minecraft Stuff
     std::cout << "CREATING WORLD OBJECT" << endl;
-    World myWorld; //Generates World
-    myWorld.SetupChunkLoader();
+    //World myWorld; //Generates World
+    //myWorld.SetupChunkLoader();
     std::cout << "FINISHED WORLD OBJECT" << endl;
     
 
@@ -212,6 +222,7 @@ int main()
     std::cout << "RENDER LOOP!" << std::endl;
     while(!glfwWindowShouldClose(window))
     {
+        sceneBuffer->Bind();
         auto startTime = std::chrono::high_resolution_clock::now();
         //Process Input
         processInput(window);
@@ -242,16 +253,32 @@ int main()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
         
-        ImGuiWindowFlags window_flags = 0;
-        window_flags |= ImGuiWindowFlags_NoBackground;
-        window_flags |= ImGuiWindowFlags_NoTitleBar;
-        window_flags |= ImGuiWindowFlags_NoDecoration; 
-        window_flags |= ImGuiWindowFlags_NoResize;
+        //ImGuiWindowFlags window_flags = 0;
+        //window_flags |= ImGuiWindowFlags_NoBackground;
+        //window_flags |= ImGuiWindowFlags_NoTitleBar;
+        //window_flags |= ImGuiWindowFlags_NoDecoration; 
+        //window_flags |= ImGuiWindowFlags_NoResize;
 
         ImGui::SetNextWindowSize(ImVec2(900, 900)); 
         ImGui::SetNextWindowPos(ImVec2(0, 0));
         bool * open_ptr = nullptr;
-        ImGui::Begin("I'm a Window!", open_ptr, window_flags);
+        //ImGui::Begin("Main Scene", open_ptr, window_flags);
+        ImGui::Begin("Main Scene");
+        {
+            ImGui::BeginChild("Game Render");
+
+            float width = ImGui::GetContentRegionAvail().x;
+            float height = ImGui::GetContentRegionAvail().y;
+
+            *m_width = width;
+            *m_height = height;
+            ImGui::Image(
+                (ImTextureID)sceneBuffer->getFrameTexture(),
+                ImGui::GetContentRegionAvail(),
+                ImVec2(0, 1),
+                ImVec2(1, 0)
+            );
+        }
         ImGui::SetCursorPos(ImVec2(20, 20));
         ImGui::Text(fpsText.c_str());
         ImGui::SetCursorPos(ImVec2(20, 40));
@@ -262,7 +289,6 @@ int main()
         ImGui::Text(zText.c_str());
         ImGui::SetCursorPos(ImVec2(20, 100));
         ImGui::Text(versionText.c_str());
-
 
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
@@ -331,6 +357,7 @@ int main()
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, specularMap);
         
+        /*
         std::vector<Chunk*> chunksToRender;
         {
             std::lock_guard<std::mutex> lock(myWorld.chunkMutex);
@@ -344,6 +371,7 @@ int main()
                 chunk->RenderChunk();
             }
         }
+        */
         
 
         //Skybox--------------------------------
@@ -369,11 +397,13 @@ int main()
         }
         lasttime += 1.0/fpsCap;
 
+        ImGui::EndChild();
         ImGui::End();
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glBindVertexArray(0);
 
+        sceneBuffer->Unbind();
         //check and swap buffers
         glfwSwapBuffers(window);
         glfwPollEvents();    
@@ -386,6 +416,7 @@ int main()
     // ------------------------------------------------------------------------
     glDeleteVertexArrays(1, &skyboxVAO);
     glDeleteBuffers(1, &skyboxVBO);
+    delete sceneBuffer;
 
     glfwTerminate();
     return 0;
@@ -454,6 +485,13 @@ void processInput(GLFWwindow *window)
     }
 }
 
+//void glfwSetWindowSizeCallback(GLFWwindow* window, int width, int height)
+//{
+//    glViewport(0, 0, width, height);
+//    sceneBuffer.ReSCALE
+//}
+
+
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -461,6 +499,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     // make sure the viewport matches the new window dimensions; note that width and 
     // height will be significantly larger than specified on retina displays.
     glViewport(0, 0, width, height);
+    sceneBuffer->RescaleFrameBuffer(width, height);
 }
 
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)

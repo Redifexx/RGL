@@ -54,5 +54,10 @@ void FrameBuffer::RescaleFrameBuffer(float width, float height)
 
 void FrameBuffer::Bind() const
 {
-    
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+}
+
+void FrameBuffer::Unbind() const
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
