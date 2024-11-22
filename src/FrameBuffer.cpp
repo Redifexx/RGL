@@ -7,7 +7,7 @@ FrameBuffer::FrameBuffer(float width, float height)
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
     glGenTextures(1, &texture);
-    std::cout << "Framebufe Texture: " << texture << std::endl;
+    //std::cout << "Framebufe Texture: " << texture << std::endl;
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     

@@ -326,7 +326,12 @@ int main()
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, specularMap);
         
-        
+        sceneBuffer->Bind();
+
+        //Rendering Commands
+        glClearColor(0.333f, 0.816f, 0.988f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
         std::vector<Chunk*> chunksToRender;
         {
             std::lock_guard<std::mutex> lock(myWorld.chunkMutex);
@@ -385,6 +390,7 @@ int main()
         //ImGui::Begin("Main Scene", open_ptr, window_flags);
         ImGui::Begin("RGLCraft", open_ptr, window_flags);
         {
+            
             ImGui::BeginChild("Game Render");
 
 
@@ -401,6 +407,7 @@ int main()
                 ImVec2(0, 1),
                 ImVec2(1, 0)
             );
+            
         }
         ImGui::SetCursorPos(ImVec2(20, 20));
         ImGui::Text(fpsText.c_str());
@@ -457,7 +464,7 @@ int main()
     // ------------------------------------------------------------------------
     glDeleteVertexArrays(1, &skyboxVAO);
     glDeleteBuffers(1, &skyboxVBO);
-    delete sceneBuffer;
+    //delete sceneBuffer;
 
     glfwTerminate();
     return 0;
@@ -554,7 +561,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     m_height = height;
     m_width = width;
     glViewport(0, 0, width, height);
-    sceneBuffer->RescaleFrameBuffer(width, height);
+    //sceneBuffer->RescaleFrameBuffer(width, height);
 }
 
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
