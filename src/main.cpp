@@ -50,13 +50,16 @@ void TakeScreenshot();
 
 // GLOBAL VARIABLES
 
-float* m_width = new float;
-float* m_height = new float;
+// Viewport Resolution
+float m_width = 0.0f;
+float m_height = 0.0f;
+
+bool cursorActive = false;
 
 // Screen Resolution
-const unsigned int SCR_WIDTH = 1280;
-const unsigned int SCR_HEIGHT = 720;
-float fpsCap = 60.0f;
+int* SCR_WIDTH = new int;
+int* SCR_HEIGHT = new int;
+float fpsCap = 170.0f;
 
 float deltaTime = 0.0f;	// Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
@@ -65,8 +68,8 @@ float lastFrame = 0.0f; // Time of last frame
 Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
 
 //Cursor Lock
-float lastX = SCR_WIDTH / 2.0f;
-float lastY = SCR_HEIGHT / 2.0f;
+float lastX = *SCR_WIDTH / 2.0f;
+float lastY = *SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 
 //Delta Time
@@ -85,6 +88,7 @@ FrameBuffer* sceneBuffer;
 
 //FUTURE OPTIMIZATION: DO MODEL, VIEW,  PROJECTION ON CPU
 
+
 int main()
 {
     // glfw: initialize and configure
@@ -101,18 +105,22 @@ int main()
     // glfw window creation
     // --------------------
     glfwWindowHint(GLFW_SAMPLES, 0);
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "RedifexxGL", NULL, NULL);
+    glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "RedifexxGL", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return -1;
     }
+    glfwGetWindowSize(window, SCR_WIDTH, SCR_HEIGHT);
+
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouse_callback); 
     glfwSetScrollCallback(window, scroll_callback); 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    cursorActive = false;
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cerr << "Failed to initialize GLAD" << std::endl;
@@ -122,7 +130,9 @@ int main()
     stbi_set_flip_vertically_on_load(true);
 
     //Framebuffer
-    sceneBuffer = new FrameBuffer(SCR_WIDTH, SCR_HEIGHT);
+    sceneBuffer = new FrameBuffer(*SCR_WIDTH, *SCR_HEIGHT);
+    m_width = *SCR_WIDTH;
+    m_height = *SCR_HEIGHT;
 
     // IMGUI SETUP
     // Setup Dear ImGui context
@@ -160,6 +170,7 @@ int main()
     cubemapPaths.push_back("../textures/cubemap/clouds1_south.bmp");
 
     unsigned int cubemapTexture = loadCubemap(cubemapPaths);
+    std::cout << "Cubemap: " << cubemapTexture << std::endl;
 
     unsigned int skyboxVAO, skyboxVBO;
     glGenVertexArrays(1, &skyboxVAO);
@@ -171,11 +182,6 @@ int main()
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     //glBindVertexArray(0);
-    
-
-
-
-    
 
     //GL Settings
     glEnable(GL_DEPTH_TEST);
@@ -190,6 +196,8 @@ int main()
     //Texture - Depricated
     unsigned int diffuseMap = loadTexture("../textures/mc_ss.png");
     unsigned int specularMap = loadTexture("../textures/mc_ss.png");
+    std::cout << "Diffuse: " << diffuseMap << std::endl;
+    std::cout << "Specular: " << specularMap << std::endl;
     
     phongShader.use();
     glUniform1i(glGetUniformLocation(phongShader.ID, "material.diffuse"), 0);
@@ -208,12 +216,12 @@ int main()
     std::string xText = ""; 
     std::string yText = ""; 
     std::string zText = "";
-    std::string versionText = "Dev 0.3";
+    std::string versionText = "Development v0.3";
 
     //Minecraft Stuff
     std::cout << "CREATING WORLD OBJECT" << endl;
-    //World myWorld; //Generates World
-    //myWorld.SetupChunkLoader();
+    World myWorld; //Generates World
+    myWorld.SetupChunkLoader();
     std::cout << "FINISHED WORLD OBJECT" << endl;
     
 
@@ -222,8 +230,9 @@ int main()
     std::cout << "RENDER LOOP!" << std::endl;
     while(!glfwWindowShouldClose(window))
     {
-        sceneBuffer->Bind();
+        //std::cout << *SCR_WIDTH << std::endl;
         auto startTime = std::chrono::high_resolution_clock::now();
+        
         //Process Input
         processInput(window);
 
@@ -244,56 +253,16 @@ int main()
         yText = "Y: " + std::to_string(camera.Position.y);
         zText = "Z: " + std::to_string(camera.Position.z);
 
+        sceneBuffer->Bind();
+
         //Rendering Commands
         glClearColor(0.333f, 0.816f, 0.988f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        
-
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-        
-        //ImGuiWindowFlags window_flags = 0;
-        //window_flags |= ImGuiWindowFlags_NoBackground;
-        //window_flags |= ImGuiWindowFlags_NoTitleBar;
-        //window_flags |= ImGuiWindowFlags_NoDecoration; 
-        //window_flags |= ImGuiWindowFlags_NoResize;
-
-        ImGui::SetNextWindowSize(ImVec2(900, 900)); 
-        ImGui::SetNextWindowPos(ImVec2(0, 0));
-        bool * open_ptr = nullptr;
-        //ImGui::Begin("Main Scene", open_ptr, window_flags);
-        ImGui::Begin("Main Scene");
-        {
-            ImGui::BeginChild("Game Render");
-
-            float width = ImGui::GetContentRegionAvail().x;
-            float height = ImGui::GetContentRegionAvail().y;
-
-            *m_width = width;
-            *m_height = height;
-            ImGui::Image(
-                (ImTextureID)sceneBuffer->getFrameTexture(),
-                ImGui::GetContentRegionAvail(),
-                ImVec2(0, 1),
-                ImVec2(1, 0)
-            );
-        }
-        ImGui::SetCursorPos(ImVec2(20, 20));
-        ImGui::Text(fpsText.c_str());
-        ImGui::SetCursorPos(ImVec2(20, 40));
-        ImGui::Text(xText.c_str());
-        ImGui::SetCursorPos(ImVec2(20, 60));
-        ImGui::Text(yText.c_str());
-        ImGui::SetCursorPos(ImVec2(20, 80));
-        ImGui::Text(zText.c_str());
-        ImGui::SetCursorPos(ImVec2(20, 100));
-        ImGui::Text(versionText.c_str());
+    
 
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-
 
 
         //Render Stuff
@@ -304,7 +273,7 @@ int main()
 
         // Cam Transformations
         glm::mat4 view = camera.GetViewMatrix();
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.001f, 1000.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)*SCR_WIDTH / (float)*SCR_HEIGHT, 0.001f, 1000.0f);
         glm::mat4 model = glm::mat4(1.0f);
         //model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
         //model = glm::scale(model, glm::vec3(1.0f));
@@ -357,7 +326,7 @@ int main()
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, specularMap);
         
-        /*
+        
         std::vector<Chunk*> chunksToRender;
         {
             std::lock_guard<std::mutex> lock(myWorld.chunkMutex);
@@ -371,7 +340,7 @@ int main()
                 chunk->RenderChunk();
             }
         }
-        */
+        
         
 
         //Skybox--------------------------------
@@ -380,7 +349,6 @@ int main()
         skyboxShader.use();
 
         view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
-        //projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.001f, 1000.0f);
         glUniformMatrix4fv(glGetUniformLocation(skyboxShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(glGetUniformLocation(skyboxShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
         glBindVertexArray(skyboxVAO);
@@ -392,10 +360,80 @@ int main()
         //glDepthMask(GL_TRUE);
         glDepthFunc(GL_LESS);
 
+        sceneBuffer->Unbind();
+
         while (glfwGetTime() < lasttime + 1.0/fpsCap) {
             //FPS
         }
         lasttime += 1.0/fpsCap;
+
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+        
+        ImGuiWindowFlags window_flags = 0;
+        //window_flags |= ImGuiWindowFlags_NoBackground;
+        //window_flags |= ImGuiWindowFlags_NoTitleBar;
+        //window_flags |= ImGuiWindowFlags_NoDecoration; 
+        //window_flags |= ImGuiWindowFlags_NoResize;
+
+
+        ImGui::SetNextWindowSize(ImVec2(*SCR_WIDTH, *SCR_HEIGHT)); 
+        ImGui::SetNextWindowPos(ImVec2(0, 0));
+        bool * open_ptr = nullptr;
+        //ImGui::Begin("Main Scene", open_ptr, window_flags);
+        ImGui::Begin("RGLCraft", open_ptr, window_flags);
+        {
+            ImGui::BeginChild("Game Render");
+
+
+            //This is for viewport
+            float width = ImGui::GetContentRegionAvail().x;
+            float height = ImGui::GetContentRegionAvail().y;
+
+            m_width = width;
+            m_height = height;
+
+            ImGui::Image(
+                (ImTextureID)sceneBuffer->getFrameTexture(),
+                ImGui::GetContentRegionAvail(),
+                ImVec2(0, 1),
+                ImVec2(1, 0)
+            );
+        }
+        ImGui::SetCursorPos(ImVec2(20, 20));
+        ImGui::Text(fpsText.c_str());
+        ImGui::SetCursorPos(ImVec2(20, 40));
+        ImGui::Text(xText.c_str());
+        ImGui::SetCursorPos(ImVec2(20, 60));
+        ImGui::Text(yText.c_str());
+        ImGui::SetCursorPos(ImVec2(20, 80));
+        ImGui::Text(zText.c_str());
+        ImGui::SetCursorPos(ImVec2(20, 100));
+        ImGui::Text(versionText.c_str());
+        ImGui::SetCursorPos(ImVec2(20, 120));
+        ImGui::SetCursorPos(ImVec2(20, 140)); // Position the dropdown below the button
+        //ImGui::SetNextWindowSize(ImVec2(200, 150));
+        //ImGui::SetNextItemWidth(150);
+        //if (ImGui::BeginCombo("Menu", "Select Option"))
+        //{
+        //    if (ImGui::Selectable("Exit"))
+        //    {
+        //        glfwSetWindowShouldClose(window, true);
+        //    }
+        //    ImGui::EndCombo();  // Close the combo box
+        //}
+        if (ImGui::Button("Exit")) {
+            glfwSetWindowShouldClose(window, true);
+        }
+        if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+            if (cursorActive = true)
+            {
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            }
+            cursorActive = false;
+        }
 
         ImGui::EndChild();
         ImGui::End();
@@ -403,13 +441,16 @@ int main()
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glBindVertexArray(0);
 
-        sceneBuffer->Unbind();
         //check and swap buffers
         glfwSwapBuffers(window);
         glfwPollEvents();    
         auto endTime = std::chrono::high_resolution_clock::now();
         double renderTime = std::chrono::duration<double, std::micro>(endTime - startTime).count();
         totalRenderTime += renderTime;
+        GLenum err = glGetError();
+        if (err != GL_NO_ERROR) {
+            std::cout << "OpenGL Error: " << err << std::endl;
+        }
     }
     
     // optional: de-allocate all resources once they've outlived their purpose:
@@ -430,7 +471,8 @@ void processInput(GLFWwindow *window)
     bool isShiftDown = false;
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
-        glfwSetWindowShouldClose(window, true);
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        cursorActive = true;
     }
     if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
     {
@@ -485,11 +527,22 @@ void processInput(GLFWwindow *window)
     }
 }
 
-//void glfwSetWindowSizeCallback(GLFWwindow* window, int width, int height)
-//{
-//    glViewport(0, 0, width, height);
-//    sceneBuffer.ReSCALE
-//}
+void glfwSetWindowSizeCallback(GLFWwindow* window, int width, int height)
+{
+    glViewport(0, 0, width, height);
+    *SCR_WIDTH = width;
+    *SCR_HEIGHT = height;
+
+    if (m_height > *SCR_HEIGHT)
+    {
+        m_height = *SCR_HEIGHT;
+    }
+
+    if (m_width > *SCR_WIDTH)
+    {
+        m_width = *SCR_WIDTH;
+    }
+}
 
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -498,29 +551,33 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     // make sure the viewport matches the new window dimensions; note that width and 
     // height will be significantly larger than specified on retina displays.
+    m_height = height;
+    m_width = width;
     glViewport(0, 0, width, height);
     sceneBuffer->RescaleFrameBuffer(width, height);
 }
 
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
-
-    float xpos = static_cast<float>(xposIn);
-    float ypos = static_cast<float>(yposIn);
-
-    if (firstMouse) // initially set to true
+    if (!cursorActive)
     {
+        float xpos = static_cast<float>(xposIn);
+        float ypos = static_cast<float>(yposIn);
+
+        if (firstMouse) // initially set to true
+        {
+            lastX = xpos;
+            lastY = ypos;
+            firstMouse = false;
+        }
+
+        float xoffset = xpos - lastX;
+        float yoffset = lastY - ypos;
         lastX = xpos;
         lastY = ypos;
-        firstMouse = false;
+
+        camera.ProcessMouseMovement(xoffset, yoffset);
     }
-
-    float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos;
-    lastX = xpos;
-    lastY = ypos;
-
-    camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
@@ -620,8 +677,8 @@ void TakeScreenshot()
     std::cout << "Screenshot!" << std::endl;
     unsigned char* buffer;
     char filename[50];
-    int w = SCR_WIDTH;
-    int h = SCR_HEIGHT;
+    int w = *SCR_WIDTH;
+    int h = *SCR_HEIGHT;
     int buf_size = HEADER_SIZE + (w * h * 3);
     int i;
     unsigned char temp;

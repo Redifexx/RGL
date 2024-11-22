@@ -2,10 +2,12 @@
 
 FrameBuffer::FrameBuffer(float width, float height)
 {
+    std::cout << "FRAMEBUFFER SET UP" << std::endl;
     glGenFramebuffers(1, &fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
     glGenTextures(1, &texture);
+    std::cout << "Framebufe Texture: " << texture << std::endl;
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     
@@ -35,11 +37,14 @@ FrameBuffer::~FrameBuffer()
 
 unsigned int FrameBuffer::getFrameTexture()
 {
+    //std::cout << "FRAMEBUFFER GET TEXTURE" << std::endl;
+    
     return texture;
 }
 
 void FrameBuffer::RescaleFrameBuffer(float width, float height)
 {
+    //std::cout << "FRAMEBUFFER RESCALE" << std::endl;
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
@@ -54,10 +59,12 @@ void FrameBuffer::RescaleFrameBuffer(float width, float height)
 
 void FrameBuffer::Bind() const
 {
+    //std::cout << "FRAMEBUFFER BIND" << std::endl;
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 }
 
 void FrameBuffer::Unbind() const
 {
+    //std::cout << "FRAMEBUFFER UNBIND" << std::endl;
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
