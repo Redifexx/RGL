@@ -7,15 +7,16 @@ in vec2 TexCoord;
 // MATERIAL DEFINITION
 struct Material 
 {
-    vec3 diffuseColor = vec3(1.0f, 1.0f, 1.0f);
-    vec3 specularColor = vec3(1.0f, 1.0f, 1.0f);
-    vec3 emissiveColor = vec3(1.0f, 1.0f, 1.0f);
-    float specularFactor = 0.0f;
-    float emissiveFactor = 0.0f;
-    float shininess = 32.0f;
+    vec3 diffuseColor;
+    vec3 specularColor;
+    vec3 emissiveColor;
+    float specularFactor;
+    float emissiveFactor;
+    float shininess;
 };
 
 uniform Material defaultMaterial;
+
 uniform vec3 viewPos;
 
 //LIGHT DEFINITION
@@ -137,7 +138,7 @@ vec3 SpotLightResult(SpotLight light, Material material)
 
 vec3 NoLightResult(Material material)
 {
-    vec3 result = defaultMaterial.color;
+    vec3 result = defaultMaterial.diffuseColor;
     return result;
 }
 
@@ -171,7 +172,7 @@ void main()
 
     vec3 result = vec3(0.0f);
     //result += PointLightResult(ptLight, material);
-    result += DirectionalLightResult(dirLight, material);
+    result += DirectionalLightResult(dirLight, defaultMaterial);
     //result += SpotLightResult(spotLight, material);
     //result += NoLightResult(material);
     result += ambient;

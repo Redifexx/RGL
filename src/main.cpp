@@ -154,13 +154,14 @@ int main()
     // ------------------------------------------------------------------
 
     Shader phongShader("../shaders/source.vs", "../shaders/source.fs");
+    Shader simplePhongShader("../shaders/source.vs", "../shaders/simplePhong.fs");
     Shader skyboxShader("../shaders/skybox.vs", "../shaders/skybox.fs");
     Shader modelShader("../shaders/modelLoad.vs", "../shaders/modelLoad.fs");
     Shader stencilShader("../shaders/objOutline.vs", "../shaders/objOutline.fs");
     Shader lightCubeShader("../shaders/lightCube.vs", "../shaders/lightCube.fs");
 
     // Model Importing
-    Model castle("../model/feyd.obj");
+    Model castle("../model/skibidi.obj");
     //unsigned int castle_marble_diffuse = 0;
     //unsigned int castle_marble_specular = 0;
     //unsigned int castle_grass_diffuse = loadTexture("../models/castle/grass1-albedo3.png");
@@ -289,33 +290,39 @@ int main()
         glDepthFunc(GL_LESS);
 
         //Render Mesh------------------------
-        phongShader.use();
+        simplePhongShader.use();
 
         // Passes the Transforms
         view = camera.GetViewMatrix();
-        glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(glGetUniformLocation(simplePhongShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(glGetUniformLocation(simplePhongShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(simplePhongShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
         // Material Settings for Phong Shader
+        glm::vec3 diffuseColor = glm::vec3(1.0f, 1.0f, 1.0f);
+        glm::vec3 specularColor = glm::vec3(1.0f, 1.0f, 1.0f);
+        glm::vec3 emissiveColor = glm::vec3(1.0f, 1.0f, 1.0f);
+        glUniform3fv(glGetUniformLocation(simplePhongShader.ID, "defaultMaterial.diffuseColor"),  1,  glm::value_ptr(diffuseColor));
+        glUniform3fv(glGetUniformLocation(simplePhongShader.ID, "defaultMaterial.specularColor"), 1, glm::value_ptr(specularColor));
+        glUniform3fv(glGetUniformLocation(simplePhongShader.ID, "defaultMaterial.emissiveColor"), 1, glm::value_ptr(emissiveColor));
         float materialSpecFactor = 0.0f;
         float materialEmisFactor = 0.0f;
         float materialShininess = 32.0f;
-        glUniform1f(glGetUniformLocation(phongShader.ID, "material.specularFactor"), materialSpecFactor);
-        glUniform1f(glGetUniformLocation(phongShader.ID, "material.emissiveFactor"), materialEmisFactor);
-        glUniform1f(glGetUniformLocation(phongShader.ID, "material.shininess"), materialShininess);
+        glUniform1f(glGetUniformLocation(simplePhongShader.ID, "defaultMaterial.specularFactor"), materialSpecFactor);
+        glUniform1f(glGetUniformLocation(simplePhongShader.ID, "defaultMaterial.emissiveFactor"), materialEmisFactor);
+        glUniform1f(glGetUniformLocation(simplePhongShader.ID, "defaultMaterial.shininess"), materialShininess);
         
         // Sets up Spot Light for Camera
         glm::vec3 white = glm::vec3(1.0f);
-        glUniform3fv(glGetUniformLocation(phongShader.ID, "spotLight.position"), 1, glm::value_ptr(camera.Position));
-        glUniform3fv(glGetUniformLocation(phongShader.ID, "spotLight.direction"), 1, glm::value_ptr(camera.Front));
-        glUniform3fv(glGetUniformLocation(phongShader.ID, "spotLight.color"), 1, glm::value_ptr(white));
+        glUniform3fv(glGetUniformLocation(simplePhongShader.ID, "spotLight.position"), 1, glm::value_ptr(camera.Position));
+        glUniform3fv(glGetUniformLocation(simplePhongShader.ID, "spotLight.direction"), 1, glm::value_ptr(camera.Front));
+        glUniform3fv(glGetUniformLocation(simplePhongShader.ID, "spotLight.color"), 1, glm::value_ptr(white));
         float iC = glm::cos(glm::radians(12.5f));
         float oC = glm::cos(glm::radians(30.5f));
-        glUniform1f(glGetUniformLocation(phongShader.ID, "spotLight.innerCutOff"), iC);
-        glUniform1f(glGetUniformLocation(phongShader.ID, "spotLight.outerCutOff"), oC);
-        glUniform1f(glGetUniformLocation(phongShader.ID, "spotLight.intensity"), 1.0f);
-        glUniform3fv(glGetUniformLocation(phongShader.ID, "viewPos"), 1, glm::value_ptr(camera.Position));
+        glUniform1f(glGetUniformLocation(simplePhongShader.ID, "spotLight.innerCutOff"), iC);
+        glUniform1f(glGetUniformLocation(simplePhongShader.ID, "spotLight.outerCutOff"), oC);
+        glUniform1f(glGetUniformLocation(simplePhongShader.ID, "spotLight.intensity"), 1.0f);
+        glUniform3fv(glGetUniformLocation(simplePhongShader.ID, "viewPos"), 1, glm::value_ptr(camera.Position));
 
         // Activates and Passes the Textures
         //glActiveTexture(GL_TEXTURE0);
@@ -330,10 +337,10 @@ int main()
         //glActiveTexture(GL_TEXTURE3);
         //glBindTexture(GL_TEXTURE_2D, castle_grass_specular);
 
-        glUniform1i(glGetUniformLocation(phongShader.ID, "material.diffuse"), 0);
-        glUniform1i(glGetUniformLocation(phongShader.ID, "material.specularMap"), 1);
+        //glUniform1i(glGetUniformLocation(phongShader.ID, "material.diffuse"), 0);
+        //glUniform1i(glGetUniformLocation(phongShader.ID, "material.specularMap"), 1);
 
-        castle.Draw(phongShader);
+        castle.Draw(simplePhongShader);
         //std::vector<Chunk*> chunksToRender;
         //{
         //    std::lock_guard<std::mutex> lock(myWorld.chunkMutex);
