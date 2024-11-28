@@ -121,3 +121,43 @@
     //Stencil
     //glEnable(GL_STENCIL_TEST);
     //glStencilFunc(GL_ALWAYS, 1, 0xFF);
+
+
+    //glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);  
+        //glStencilFunc(GL_ALWAYS, 1, 0xFF); // all fragments should pass the stencil test
+        //glStencilMask(0xFF); // enable writing to the stencil buffer
+
+        // Stencil
+        //glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        //glStencilMask(0x00); // disable writing to the stencil buffer
+        //glDisable(GL_DEPTH_TEST);
+        //stencilShader.use();
+        //model = glm::mat4(1.0f);
+        //model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+        //model = glm::scale(model, glm::vec3(1.0f));
+        //glUniformMatrix4fv(glGetUniformLocation(stencilShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        //glUniformMatrix4fv(glGetUniformLocation(stencilShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        //glUniformMatrix4fv(glGetUniformLocation(stencilShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        //backpack.Draw(stencilShader);
+        //glStencilMask(0xFF);
+        //glStencilFunc(GL_ALWAYS, 1, 0xFF);   
+        //glEnable(GL_DEPTH_TEST);
+
+        /*
+        ImGui::BeginChild("Game Render");
+
+
+            //This is for viewport
+            float width = ImGui::GetContentRegionAvail().x;
+            float height = ImGui::GetContentRegionAvail().y;
+
+            m_width = width;
+            m_height = height;
+
+            ImGui::Image(
+                (ImTextureID)sceneBuffer->getFrameTexture(),
+                ImGui::GetContentRegionAvail(),
+                ImVec2(0, 1),
+                ImVec2(1, 0)
+            );
+            */

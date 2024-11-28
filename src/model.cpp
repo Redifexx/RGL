@@ -11,7 +11,10 @@ void Model::Draw(Shader &shader)
 void Model::loadModel(string path)
 {
     Assimp::Importer import;
-    const aiScene *scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+    const aiScene *scene = import.ReadFile(path,
+    aiProcess_Triangulate |
+    aiProcess_FlipUVs |
+    aiProcess_GenNormals);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
@@ -180,6 +183,7 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type,
         {
             Texture texture;
             texture.id = TextureFromFile(str.C_Str(), directory);
+            std::cout << directory << "/" << str.C_Str() << std::endl;
             texture.type = typeName;
             texture.path = str.C_Str();
             textures.push_back(texture);

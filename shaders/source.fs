@@ -52,7 +52,8 @@ vec3 PointLightResult(PointLight light, Material material)
     vec3 lightDir = normalize(light.position - FragPos);
 
     float diff = max(dot(norm, lightDir), 0.0f);
-    vec3 diffuse = (diff * vec3(texture(material.diffuse, TexCoord))) * light.color;
+    //vec3 diffuse = (diff * vec3(texture(material.diffuse, TexCoord))) * light.color;
+    vec3 diffuse = (diff * vec3(1.0f, 1.0f, 1.0f)) * light.color;
 
     // Specular (Phong)
     vec3 viewDir = normalize(viewPos - FragPos);
@@ -80,7 +81,7 @@ vec3 DirectionalLightResult(DirectionalLight light, Material material)
     vec3 lightDir = normalize(-light.direction);
 
     float diff = max(dot(norm, lightDir), 0.0f);
-    vec3 diffuse = (diff * vec3(texture(material.diffuse, TexCoord))) * light.color;
+    vec3 diffuse = (diff * vec3(1.0f, 1.0f, 1.0f)) * light.color;
 
     // Specular (Phong)
     vec3 viewDir = normalize(viewPos - FragPos);
@@ -176,4 +177,5 @@ void main()
     result += ambient;
 
     FragColor = vec4(result, 1.0f);
+    //FragColor = vec4(normalize(Normal) * 0.5 + 0.5, 1.0);
 }

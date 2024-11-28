@@ -105,7 +105,7 @@ int main()
     // glfw window creation
     // --------------------
     glfwWindowHint(GLFW_SAMPLES, 0);
-    glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
+    //glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
     GLFWwindow* window = glfwCreateWindow(1280, 720, "RedifexxGL", NULL, NULL);
     if (window == NULL)
     {
@@ -130,9 +130,9 @@ int main()
     stbi_set_flip_vertically_on_load(true);
 
     //Framebuffer
-    sceneBuffer = new FrameBuffer(*SCR_WIDTH, *SCR_HEIGHT);
-    m_width = *SCR_WIDTH;
-    m_height = *SCR_HEIGHT;
+    //sceneBuffer = new FrameBuffer(*SCR_WIDTH, *SCR_HEIGHT);
+    //m_width = *SCR_WIDTH;
+    //m_height = *SCR_HEIGHT;
 
     // IMGUI SETUP
     // Setup Dear ImGui context
@@ -159,6 +159,14 @@ int main()
     Shader stencilShader("../shaders/objOutline.vs", "../shaders/objOutline.fs");
     Shader lightCubeShader("../shaders/lightCube.vs", "../shaders/lightCube.fs");
 
+    // Model Importing
+    Model castle("../model/feyd.obj");
+    //unsigned int castle_marble_diffuse = 0;
+    //unsigned int castle_marble_specular = 0;
+    //unsigned int castle_grass_diffuse = loadTexture("../models/castle/grass1-albedo3.png");
+    //unsigned int castle_grass_specular = loadTexture("../models/castle/grass1-smooth3.png");
+
+
     //Cubemap Path Setup
     //CubeMap Setup
     std::vector<std::string> cubemapPaths;
@@ -181,30 +189,23 @@ int main()
     glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    //glBindVertexArray(0);
+    glBindVertexArray(0);
 
     //GL Settings
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
     glDepthFunc(GL_LESS);
-    glEnable(GL_CULL_FACE); 
-    glFrontFace(GL_CCW);
-    glCullFace(GL_BACK);
+    //glEnable(GL_CULL_FACE); 
+    //glFrontFace(GL_CCW);
+    //glCullFace(GL_BACK);
 
     glfwSwapInterval(0); // Disables VSync
 
     //Texture - Depricated
-    unsigned int diffuseMap = loadTexture("../textures/mc_ss.png");
-    unsigned int specularMap = loadTexture("../textures/mc_ss.png");
-    std::cout << "Diffuse: " << diffuseMap << std::endl;
-    std::cout << "Specular: " << specularMap << std::endl;
-    
-    phongShader.use();
-    glUniform1i(glGetUniformLocation(phongShader.ID, "material.diffuse"), 0);
-    glUniform1i(glGetUniformLocation(phongShader.ID, "material.specularMap"), 1);
-    //glUniform1i(glGetUniformLocation(lightingShader.ID, "material.specularMap"), 1);
-    //glUniform1i(glGetUniformLocation(lightingShader.ID, "material.emissionMap"), 2);
-    
+    //unsigned int diffuseMap = loadTexture("../textures/mc_ss.png");
+    //unsigned int specularMap = loadTexture("../textures/mc_ss.png");
+    //std::cout << "Diffuse: " << diffuseMap << std::endl;
+    //std::cout << "Specular: " << specularMap << std::endl;
 
     double lasttime = glfwGetTime();
     int frameCount = 0;
@@ -220,8 +221,8 @@ int main()
 
     //Minecraft Stuff
     std::cout << "CREATING WORLD OBJECT" << endl;
-    World myWorld; //Generates World
-    myWorld.SetupChunkLoader();
+    //World myWorld; //Generates World
+    //myWorld.SetupChunkLoader();
     std::cout << "FINISHED WORLD OBJECT" << endl;
     
 
@@ -230,13 +231,17 @@ int main()
     std::cout << "RENDER LOOP!" << std::endl;
     while(!glfwWindowShouldClose(window))
     {
-        //std::cout << *SCR_WIDTH << std::endl;
+        glClearColor(0.333f, 0.816f, 0.988f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+
+        // Starts Timer
         auto startTime = std::chrono::high_resolution_clock::now();
         
         //Process Input
         processInput(window);
 
-        //fps capture
+        // Captures the FPS and saves to string
         calculateDeltaTime();   
         double fps = 1.0 / deltaTime_;
         totalFPS += fps;
@@ -252,56 +257,47 @@ int main()
         xText = "X: " + std::to_string(camera.Position.x);
         yText = "Y: " + std::to_string(camera.Position.y);
         zText = "Z: " + std::to_string(camera.Position.z);
-
-        sceneBuffer->Bind();
-
-        //Rendering Commands
-        glClearColor(0.333f, 0.816f, 0.988f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     
-
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
 
-        //Render Stuff
-        //glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);  
-        //glStencilFunc(GL_ALWAYS, 1, 0xFF); // all fragments should pass the stencil test
-        //glStencilMask(0xFF); // enable writing to the stencil buffer
-        phongShader.use();
-
-        // Cam Transformations
-        glm::mat4 view = camera.GetViewMatrix();
+        // Set up Camera Matrix Transforms
+        glm::mat4 view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)*SCR_WIDTH / (float)*SCR_HEIGHT, 0.001f, 1000.0f);
         glm::mat4 model = glm::mat4(1.0f);
-        //model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-        //model = glm::scale(model, glm::vec3(1.0f));
+        
+        //Render Skybox--------------------------------
+        skyboxShader.use();
+
+        // Sets up Skybox
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+
+        // Sets up Transforms and Cubemap
+        glUniformMatrix4fv(glGetUniformLocation(skyboxShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(skyboxShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        glUniform1i(glGetUniformLocation(skyboxShader.ID, "skybox"), 0);
+
+        glDepthFunc(GL_LEQUAL);
+        glDepthMask(GL_FALSE);
+        glBindVertexArray(skyboxVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glBindVertexArray(0);
+        glDepthMask(GL_TRUE);
+        glDepthFunc(GL_LESS);
+
+        //Render Mesh------------------------
+        phongShader.use();
+
+        // Passes the Transforms
+        view = camera.GetViewMatrix();
         glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
         glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(glGetUniformLocation(phongShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-        //backpack.Draw(phongShader);
 
-
-
-        // Stencil
-        //glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-        //glStencilMask(0x00); // disable writing to the stencil buffer
-        //glDisable(GL_DEPTH_TEST);
-        //stencilShader.use();
-        //model = glm::mat4(1.0f);
-        //model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-        //model = glm::scale(model, glm::vec3(1.0f));
-        //glUniformMatrix4fv(glGetUniformLocation(stencilShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
-        //glUniformMatrix4fv(glGetUniformLocation(stencilShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
-        //glUniformMatrix4fv(glGetUniformLocation(stencilShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-        //backpack.Draw(stencilShader);
-        //glStencilMask(0xFF);
-        //glStencilFunc(GL_ALWAYS, 1, 0xFF);   
-        //glEnable(GL_DEPTH_TEST);
-                
-        // Material Settings
-        
+        // Material Settings for Phong Shader
         float materialSpecFactor = 0.0f;
         float materialEmisFactor = 0.0f;
         float materialShininess = 32.0f;
@@ -309,7 +305,7 @@ int main()
         glUniform1f(glGetUniformLocation(phongShader.ID, "material.emissiveFactor"), materialEmisFactor);
         glUniform1f(glGetUniformLocation(phongShader.ID, "material.shininess"), materialShininess);
         
-        //Light Settings
+        // Sets up Spot Light for Camera
         glm::vec3 white = glm::vec3(1.0f);
         glUniform3fv(glGetUniformLocation(phongShader.ID, "spotLight.position"), 1, glm::value_ptr(camera.Position));
         glUniform3fv(glGetUniformLocation(phongShader.ID, "spotLight.direction"), 1, glm::value_ptr(camera.Front));
@@ -321,67 +317,50 @@ int main()
         glUniform1f(glGetUniformLocation(phongShader.ID, "spotLight.intensity"), 1.0f);
         glUniform3fv(glGetUniformLocation(phongShader.ID, "viewPos"), 1, glm::value_ptr(camera.Position));
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, diffuseMap);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, specularMap);
-        
-        sceneBuffer->Bind();
+        // Activates and Passes the Textures
+        //glActiveTexture(GL_TEXTURE0);
+        //glBindTexture(GL_TEXTURE_2D, castle_marble_diffuse);
 
-        //Rendering Commands
-        glClearColor(0.333f, 0.816f, 0.988f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        //glActiveTexture(GL_TEXTURE1);
+        //glBindTexture(GL_TEXTURE_2D, castle_marble_specular);
 
-        std::vector<Chunk*> chunksToRender;
-        {
-            std::lock_guard<std::mutex> lock(myWorld.chunkMutex);
-            chunksToRender = myWorld.renderableChunks; // Copy renderable chunks list
-        }
+        //glActiveTexture(GL_TEXTURE2);
+        //glBindTexture(GL_TEXTURE_2D, castle_grass_diffuse);
 
-        for (Chunk* chunk : chunksToRender)
-        {
-            if (chunk && chunk->hasGenerated) 
-            {
-                chunk->RenderChunk();
-            }
-        }
-        
-        
+        //glActiveTexture(GL_TEXTURE3);
+        //glBindTexture(GL_TEXTURE_2D, castle_grass_specular);
 
-        //Skybox--------------------------------
-        glDepthFunc(GL_LEQUAL);
-        //glDepthMask(GL_FALSE);
-        skyboxShader.use();
+        glUniform1i(glGetUniformLocation(phongShader.ID, "material.diffuse"), 0);
+        glUniform1i(glGetUniformLocation(phongShader.ID, "material.specularMap"), 1);
 
-        view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
-        glUniformMatrix4fv(glGetUniformLocation(skyboxShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(glGetUniformLocation(skyboxShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-        glBindVertexArray(skyboxVAO);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-        glUniform1i(glGetUniformLocation(skyboxShader.ID, "skybox"), 0);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        glBindVertexArray(0);
-        //glDepthMask(GL_TRUE);
-        glDepthFunc(GL_LESS);
-
-        sceneBuffer->Unbind();
+        castle.Draw(phongShader);
+        //std::vector<Chunk*> chunksToRender;
+        //{
+        //    std::lock_guard<std::mutex> lock(myWorld.chunkMutex);
+        //    chunksToRender = myWorld.renderableChunks; // Copy renderable chunks list
+        //}
+        //for (Chunk* chunk : chunksToRender)
+        //{
+        //    if (chunk && chunk->hasGenerated) 
+        //    {
+        //        chunk->RenderChunk();
+        //    }
+        //}
 
         while (glfwGetTime() < lasttime + 1.0/fpsCap) {
             //FPS
         }
         lasttime += 1.0/fpsCap;
 
-
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
         
         ImGuiWindowFlags window_flags = 0;
-        //window_flags |= ImGuiWindowFlags_NoBackground;
-        //window_flags |= ImGuiWindowFlags_NoTitleBar;
-        //window_flags |= ImGuiWindowFlags_NoDecoration; 
-        //window_flags |= ImGuiWindowFlags_NoResize;
+        window_flags |= ImGuiWindowFlags_NoBackground;
+        window_flags |= ImGuiWindowFlags_NoTitleBar;
+        window_flags |= ImGuiWindowFlags_NoDecoration; 
+        window_flags |= ImGuiWindowFlags_NoResize;
 
 
         ImGui::SetNextWindowSize(ImVec2(*SCR_WIDTH, *SCR_HEIGHT)); 
@@ -389,26 +368,6 @@ int main()
         bool * open_ptr = nullptr;
         //ImGui::Begin("Main Scene", open_ptr, window_flags);
         ImGui::Begin("RGLCraft", open_ptr, window_flags);
-        {
-            
-            ImGui::BeginChild("Game Render");
-
-
-            //This is for viewport
-            float width = ImGui::GetContentRegionAvail().x;
-            float height = ImGui::GetContentRegionAvail().y;
-
-            m_width = width;
-            m_height = height;
-
-            ImGui::Image(
-                (ImTextureID)sceneBuffer->getFrameTexture(),
-                ImGui::GetContentRegionAvail(),
-                ImVec2(0, 1),
-                ImVec2(1, 0)
-            );
-            
-        }
         ImGui::SetCursorPos(ImVec2(20, 20));
         ImGui::Text(fpsText.c_str());
         ImGui::SetCursorPos(ImVec2(20, 40));
@@ -442,7 +401,6 @@ int main()
             cursorActive = false;
         }
 
-        ImGui::EndChild();
         ImGui::End();
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -454,10 +412,6 @@ int main()
         auto endTime = std::chrono::high_resolution_clock::now();
         double renderTime = std::chrono::duration<double, std::micro>(endTime - startTime).count();
         totalRenderTime += renderTime;
-        GLenum err = glGetError();
-        if (err != GL_NO_ERROR) {
-            std::cout << "OpenGL Error: " << err << std::endl;
-        }
     }
     
     // optional: de-allocate all resources once they've outlived their purpose:
