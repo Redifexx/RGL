@@ -28,22 +28,27 @@ void Model::loadModel(string path)
 // recursively travels through assimp's tree structure
 void Model::processNode(aiNode *node, const aiScene *scene)
 {
+    //std::cout << "PROCESS" << std::endl;
     //process all node's meshes
     for (unsigned int i = 0; i < node->mNumMeshes; i++)
     {
+        //std::cout << "MESH" << std::endl;
+        //std::cout << node->mNumMeshes << std::endl;
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
         meshes.push_back(processMesh(mesh, scene));
     }
-
     //process each node's child mesh
     for (unsigned int i = 0; i < node->mNumChildren; i++)
     {
+        //std::cout << "CHILD" << std::endl;
+        //std::cout << node->mNumChildren << std::endl;
         processNode(node->mChildren[i], scene);
     }
 }
 
 Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 {
+    //std::cout << "PROCESSMESH" << std::endl;
     vector<Vertex> vertices;
     vector<unsigned int> indices;
     vector<Texture> textures;
@@ -51,6 +56,8 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     //Vertex Data
     for (unsigned int i = 0; i < mesh->mNumVertices; i++)
     {
+        //std::cout << "VERTEX" << std::endl;
+        //std::cout << mesh->mNumVertices << std::endl;
         Vertex vertex;
         glm::vec3 vector;
         vector.x = mesh->mVertices[i].x;
@@ -58,16 +65,16 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
         vector.z = mesh->mVertices[i].z;
         vertex.Position = vector;
 
-        if (mesh->mNormals)
-        {
-            vector.x = mesh->mNormals[i].x;
-            vector.y = mesh->mNormals[i].y;
-            vector.z = mesh->mNormals[i].z;
-            vertex.Normal = vector;
-        }
+        //std::cout << "NORMAL" << std::endl;
+        vector.x = mesh->mNormals[i].x;
+        vector.y = mesh->mNormals[i].y;
+        vector.z = mesh->mNormals[i].z;
+        vertex.Normal = vector;
+
 
         if (mesh->mTextureCoords[0])
         {
+            //std::cout << "TEXCOORDSSTART" << std::endl;
             glm::vec2 tex;
             tex.x = mesh->mTextureCoords[0][i].x; 
             tex.y = mesh->mTextureCoords[0][i].y;
@@ -75,6 +82,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 
             if (mesh->mTangents)
             {
+                //std::cout << "Tangent" << std::endl;
                 // tangent
                 vector.x = mesh->mTangents[i].x;
                 vector.y = mesh->mTangents[i].y;
@@ -84,18 +92,42 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
             
             if (mesh->mBitangents)
             {
+                //std::cout << "Bitangent" << std::endl;
                 // bitangent
                 vector.x = mesh->mBitangents[i].x;
                 vector.y = mesh->mBitangents[i].y;
                 vector.z = mesh->mBitangents[i].z;
                 vertex.Bitangent = vector;
             }
+
+            /*
+            if (scene->mNumMaterials > mesh->mMaterialIndex)
+            {
+            const auto& mat = scene->mMaterials[mesh->mMaterialIndex];
+            aiColor4D diffuse;
+            if (AI_SUCCESS == aiGetMaterialColor(mat, AI_MATKEY_COLOR_DIFFUSE, &diffuse))
+            {
+                vertex.color = glm::vec4(diffuse.r, diffuse.g, diffuse.b, diffuse.a);
+            }
+
+            if (mat->GetTextureCount(aiTextureType_DIFFUSE) > 0)
+            {
+                vertex.useDiffuseTexture = 1.f;
+            }
+            else
+            {
+                vertex.useDiffuseTexture = 0.f;
+            }
+            */
+            //std::cout << "TEXCOORDSEND" << std::endl;
         }
         else
         {
+            //std::cout << "NOTEXCOORDS" << std::endl;
             vertex.TexCoords = glm::vec2(0.0f, 0.0f);
         }
         vertices.push_back(vertex);
+        //std::cout << "VERTEXEND" << std::endl;
     }
 
     //Indices

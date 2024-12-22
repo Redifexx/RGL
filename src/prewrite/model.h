@@ -13,6 +13,7 @@
 
 unsigned int TextureFromFile(const char *path, const string &directory, bool gamma = false);
 
+
 struct Material {
     glm::vec3 Diffuse;
     glm::vec3 Specular;

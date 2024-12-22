@@ -5,6 +5,7 @@
 #include <GLM/glm.hpp>
 #include <GLM/gtc/matrix_transform.hpp>
 
+
 enum Camera_Movement
 {
     FORWARD,
@@ -22,7 +23,8 @@ const float SENSITIVITY = 0.1f;
 const float ZOOM = 80.0f;
 const float MULTIPLIER = 1.0f;
 
-class Camera
+
+class Camera 
 {
 public:
     // Camera Attributes
@@ -41,6 +43,8 @@ public:
     float MouseSensitivity;
     float Zoom;
     float Multiplier_;
+
+
 
     // constructors with vectors
     Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVITY), Zoom(ZOOM), Multiplier_(MULTIPLIER)
@@ -80,7 +84,6 @@ public:
         if (direction == FORWARD)
         {
             Position += Front * velocity * multiplier * Multiplier_;
-            //std::cout << velocity << std::endl;
         }
         if (direction == BACKWARD)
         {
